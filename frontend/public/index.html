@@ -96,7 +96,7 @@
                         <div class="p-4">
                             <div class="flex justify-between items-start mb-1">
                                 <h3 class="text-lg font-extrabold text-gray-900 leading-tight" x-text="car.model"></h3>
-                                <span class="text-green-600 font-black text-lg" x-text="car.price"></span>
+                                <span class="text-green-600 font-black text-lg" x-text="formatMoney(car.price)"></span>
                             </div>
                             <p class="text-sm text-gray-500 mb-3" x-text="car.km + ' • ' + car.trans"></p>
                             
@@ -141,70 +141,6 @@
         </button>
     </nav>
 
-    <script>
-        function app() {
-            return {
-                search: '',
-                cars: [
-                    { 
-                        id: 1, 
-                        model: '2019 Jeep Wrangler Sahara', 
-                        price: '$650,000', 
-                        year: '2019', 
-                        km: '42,000 km',
-                        trans: 'Aut',
-                        image: 'https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?auto=format&fit=crop&w=600&q=80',
-                        verified: true,
-                        legal: 'Nacional',
-                        warranty: true 
-                    },
-                    { 
-                        id: 2, 
-                        model: '2015 Ford Lobo Lariat', 
-                        price: '$420,000', 
-                        year: '2015', 
-                        km: '110,000 km',
-                        trans: 'Aut',
-                        image: 'https://images.unsplash.com/photo-1552519507-da3b142c6e3d?auto=format&fit=crop&w=600&q=80',
-                        verified: false,
-                        legal: 'Importado',
-                        warranty: false
-                    },
-                    { 
-                        id: 3, 
-                        model: '2021 Toyota Tacoma', 
-                        price: '$780,000', 
-                        year: '2021', 
-                        km: '20,000 km',
-                        trans: 'Aut',
-                        image: 'https://images.unsplash.com/photo-1517026575992-5e1174425333?auto=format&fit=crop&w=600&q=80',
-                        verified: true,
-                        legal: 'Nacional',
-                        warranty: true
-                    },
-                    { 
-                        id: 4, 
-                        model: '2012 Honda Civic', 
-                        price: '$145,000', 
-                        year: '2012', 
-                        km: '160,000 km',
-                        trans: 'Std',
-                        image: 'https://images.unsplash.com/photo-1590362835106-132b32238194?auto=format&fit=crop&w=600&q=80',
-                        verified: false,
-                        legal: 'Fronterizo',
-                        warranty: false
-                    }
-                ],
-                get filteredCars() {
-                    return this.cars.filter(car => 
-                        car.model.toLowerCase().includes(this.search.toLowerCase())
-                    );
-                },
-                openCar(car) {
-                    console.log('Navigate to details for', car.model);
-                }
-            }
-        }
-    </script>
+  <script type="module" src="./js/logic.js"></script>
 </body>
 </html>
