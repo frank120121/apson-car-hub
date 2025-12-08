@@ -1,43 +1,210 @@
 <!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#000000" />
-    <meta
-      name="description"
-      content="Web site created using create-react-app"
-    />
-    <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
-    <!--
-      manifest.json provides metadata used when your web app is installed on a
-      user's mobile device or desktop. See https://developers.google.com/web/fundamentals/web-app-manifest/
-    -->
-    <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
-    <!--
-      Notice the use of %PUBLIC_URL% in the tags above.
-      It will be replaced with the URL of the `public` folder during the build.
-      Only files inside the `public` folder can be referenced from the HTML.
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Apson Car Hub</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <style> body { font-family: 'Inter', sans-serif; } </style>
+</head>
+<body class="bg-gray-50 pb-24 select-none" x-data="app()">
 
-      Unlike "/favicon.ico" or "favicon.ico", "%PUBLIC_URL%/favicon.ico" will
-      work correctly both with client-side routing and a non-root public URL.
-      Learn how to configure a non-root public URL by running `npm run build`.
-    -->
-    <title>React App</title>
-  </head>
-  <body>
-    <noscript>You need to enable JavaScript to run this app.</noscript>
-    <div id="root"></div>
-    <!--
-      This HTML file is a template.
-      If you open it directly in the browser, you will see an empty page.
+    <header class="bg-white border-b border-gray-200 sticky top-0 z-40 pb-2">
+        <div class="px-4 pt-4 pb-2 flex justify-between items-center">
+            <div>
+                <h1 class="text-xl font-extrabold tracking-tight text-gray-900">APSON<span class="text-blue-600">CARHUB</span></h1>
+                <p class="text-xs text-gray-400 font-medium">Marketplace Oficial de Agua Prieta</p>
+            </div>
+            <button class="p-2 bg-gray-100 rounded-full text-gray-600">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+            </button>
+        </div>
 
-      You can add webfonts, meta tags, or analytics to this file.
-      The build step will place the bundled scripts into the <body> tag.
+        <div class="px-4 mt-1">
+            <div class="relative">
+                <span class="absolute left-3 top-3 text-gray-400">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                </span>
+                <input type="text" x-model="search" placeholder="Buscar Jeep, Lobo, Civic..." 
+                    class="w-full bg-gray-100 text-gray-900 rounded-xl py-3 pl-10 pr-4 focus:ring-2 focus:ring-blue-500 focus:outline-none font-medium placeholder-gray-500">
+            </div>
+        </div>
+    </header>
 
-      To begin the development, run `npm start` or `yarn start`.
-      To create a production bundle, use `npm run build` or `yarn build`.
-    -->
-  </body>
+    <main class="px-4 pt-4">
+
+        <div class="bg-blue-600 rounded-xl p-4 text-white shadow-lg mb-6 flex items-center justify-between overflow-hidden relative">
+            <div class="relative z-10">
+                <h2 class="font-bold text-lg leading-tight">Compra con <br>Confianza</h2>
+                <div class="flex gap-2 mt-2 text-xs font-medium text-blue-100">
+                    <span class="bg-blue-700 px-2 py-1 rounded">🛡️ Garantía Mecánica</span>
+                </div>
+            </div>
+            <div class="text-6xl opacity-20 absolute -right-4 -bottom-4">🤝</div>
+        </div>
+
+        <div class="mb-6">
+            <h3 class="font-bold text-gray-800 mb-3 text-sm uppercase tracking-wide">Lotes Verificados</h3>
+            <div class="flex gap-3 overflow-x-auto pb-4 snap-x no-scrollbar">
+                <div class="snap-start shrink-0 w-28 text-center">
+                    <div class="w-28 h-28 rounded-full bg-gray-200 overflow-hidden border-2 border-blue-500 p-1">
+                        <img src="https://ui-avatars.com/api/?name=Autos+Daniel&background=random" class="w-full h-full rounded-full object-cover">
+                    </div>
+                    <p class="text-xs font-bold mt-2 text-gray-700">Autos Daniel</p>
+                </div>
+                <div class="snap-start shrink-0 w-28 text-center">
+                    <div class="w-28 h-28 rounded-full bg-gray-200 overflow-hidden border-2 border-transparent">
+                        <img src="https://ui-avatars.com/api/?name=El+Camino&background=random" class="w-full h-full rounded-full object-cover">
+                    </div>
+                    <p class="text-xs font-bold mt-2 text-gray-700">El Camino</p>
+                </div>
+                 <div class="snap-start shrink-0 w-28 text-center">
+                    <div class="w-28 h-28 rounded-full bg-gray-200 overflow-hidden border-2 border-transparent">
+                        <img src="https://ui-avatars.com/api/?name=Garage+Norte&background=random" class="w-full h-full rounded-full object-cover">
+                    </div>
+                    <p class="text-xs font-bold mt-2 text-gray-700">Garage Norte</p>
+                </div>
+            </div>
+        </div>
+
+        <div>
+            <h3 class="font-bold text-gray-800 mb-3 text-sm uppercase tracking-wide">Recién Llegados</h3>
+            
+            <div class="grid gap-5">
+                <template x-for="car in filteredCars" :key="car.id">
+                    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden active:scale-95 transition-transform duration-100" @click="openCar(car)">
+                        
+                        <div class="relative h-56 bg-gray-200">
+                            <img :src="car.image" class="w-full h-full object-cover">
+                            
+                            <div class="absolute top-3 left-3 flex gap-1">
+                                <span x-show="car.verified" class="bg-white/90 backdrop-blur text-blue-700 text-xs font-bold px-2 py-1 rounded-md shadow-sm border border-blue-100 flex items-center gap-1">
+                                    <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
+                                    Verificado
+                                </span>
+                            </div>
+                            
+                            <div class="absolute bottom-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded font-mono">
+                                <span x-text="car.year"></span>
+                            </div>
+                        </div>
+
+                        <div class="p-4">
+                            <div class="flex justify-between items-start mb-1">
+                                <h3 class="text-lg font-extrabold text-gray-900 leading-tight" x-text="car.model"></h3>
+                                <span class="text-green-600 font-black text-lg" x-text="car.price"></span>
+                            </div>
+                            <p class="text-sm text-gray-500 mb-3" x-text="car.km + ' • ' + car.trans"></p>
+                            
+                            <div class="flex flex-wrap gap-2">
+                                <span class="px-2 py-1 bg-gray-100 text-gray-600 text-xs font-semibold rounded-md" x-text="car.legal"></span>
+                                <span x-show="car.warranty" class="px-2 py-1 bg-green-50 text-green-700 text-xs font-semibold rounded-md border border-green-100">Garantía 1 año</span>
+                            </div>
+                        </div>
+                    </div>
+                </template>
+            </div>
+        </div>
+    </main>
+
+    <a href="https://wa.me/526333331107" class="fixed bottom-24 right-4 bg-[#25D366] text-white p-4 rounded-full shadow-xl z-50 hover:bg-green-600 transition-colors flex items-center gap-2">
+        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.463 1.065 2.875 1.213 3.074.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg>
+        <span class="font-bold text-sm">WhatsApp</span>
+    </a>
+
+    <nav class="fixed bottom-0 w-full bg-white border-t border-gray-200 flex justify-around p-3 z-50 pb-6 shadow-[0_-5px_15px_rgba(0,0,0,0.05)]">
+        <button class="flex flex-col items-center text-blue-600">
+            <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
+            <span class="text-[10px] font-bold">Inicio</span>
+        </button>
+        <button class="flex flex-col items-center text-gray-400 hover:text-gray-600">
+            <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path></svg>
+            <span class="text-[10px] font-medium">Favoritos</span>
+        </button>
+        <button class="flex flex-col items-center text-gray-400 hover:text-gray-600">
+            <div class="bg-blue-600 rounded-full p-2 -mt-6 shadow-lg border-4 border-white">
+                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+            </div>
+            <span class="text-[10px] font-medium mt-1">Vender</span>
+        </button>
+        <button class="flex flex-col items-center text-gray-400 hover:text-gray-600">
+             <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>
+            <span class="text-[10px] font-medium">Chat</span>
+        </button>
+        <button class="flex flex-col items-center text-gray-400 hover:text-gray-600">
+            <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+            <span class="text-[10px] font-medium">Perfil</span>
+        </button>
+    </nav>
+
+    <script>
+        function app() {
+            return {
+                search: '',
+                cars: [
+                    { 
+                        id: 1, 
+                        model: '2019 Jeep Wrangler Sahara', 
+                        price: '$650,000', 
+                        year: '2019', 
+                        km: '42,000 km',
+                        trans: 'Aut',
+                        image: 'https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?auto=format&fit=crop&w=600&q=80',
+                        verified: true,
+                        legal: 'Nacional',
+                        warranty: true 
+                    },
+                    { 
+                        id: 2, 
+                        model: '2015 Ford Lobo Lariat', 
+                        price: '$420,000', 
+                        year: '2015', 
+                        km: '110,000 km',
+                        trans: 'Aut',
+                        image: 'https://images.unsplash.com/photo-1552519507-da3b142c6e3d?auto=format&fit=crop&w=600&q=80',
+                        verified: false,
+                        legal: 'Importado',
+                        warranty: false
+                    },
+                    { 
+                        id: 3, 
+                        model: '2021 Toyota Tacoma', 
+                        price: '$780,000', 
+                        year: '2021', 
+                        km: '20,000 km',
+                        trans: 'Aut',
+                        image: 'https://images.unsplash.com/photo-1517026575992-5e1174425333?auto=format&fit=crop&w=600&q=80',
+                        verified: true,
+                        legal: 'Nacional',
+                        warranty: true
+                    },
+                    { 
+                        id: 4, 
+                        model: '2012 Honda Civic', 
+                        price: '$145,000', 
+                        year: '2012', 
+                        km: '160,000 km',
+                        trans: 'Std',
+                        image: 'https://images.unsplash.com/photo-1590362835106-132b32238194?auto=format&fit=crop&w=600&q=80',
+                        verified: false,
+                        legal: 'Fronterizo',
+                        warranty: false
+                    }
+                ],
+                get filteredCars() {
+                    return this.cars.filter(car => 
+                        car.model.toLowerCase().includes(this.search.toLowerCase())
+                    );
+                },
+                openCar(car) {
+                    console.log('Navigate to details for', car.model);
+                }
+            }
+        }
+    </script>
+</body>
 </html>
