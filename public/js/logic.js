@@ -12,18 +12,23 @@ window.app = function() {
         cars: [],
         favorites: [],
         search: '',
-        currentView: 'home', // 'home', 'favorites', 'profile'
+        currentView: 'home',
         
+        // UI STATE
         selectedCar: null, 
         searchOpen: false,
         loading: true,
         error: null,
 
+        // AUTH STATE
+        isLoggedIn: false,
+        user: null,
+
         // LIFECYCLE
         async init() {
             console.log("App initialized.");
             
-            // Load Favorites from phone
+            // Load Favorites
             const saved = localStorage.getItem('apson_favorites');
             if (saved) this.favorites = JSON.parse(saved);
 
@@ -42,6 +47,17 @@ window.app = function() {
                 
                 this.cars = querySnapshot.docs.map(doc => {
                     const data = doc.data();
+                    
+                    // Handle Date (Convert Firebase Timestamp to JS Date)
+                    let date = new Date();
+                    if (data.created_at && data.created_at.toDate) {
+                        date = data.created_at.toDate();
+                    }
+
+                    // Auto-Detect 4x4
+                    const is4x4 = (data.model || "").toLowerCase().includes("4x4") || 
+                                  (data.transmission || "").toLowerCase().includes("4x4");
+
                     return {
                         id: doc.id,
                         model: data.model || "Modelo Desconocido",
@@ -49,19 +65,22 @@ window.app = function() {
                         year: data.year || "2000",
                         km: data.mileage || "0",
                         trans: data.transmission || "Auto",
-                        // Use placeholder if no image
+                        // Smart Image Loading
                         image: (data.images && data.images.length > 0) ? data.images[0] : 'https://placehold.co/600x400?text=Sin+Foto',
-                        // Flags
+                        
+                        // Flags & Metadata
                         verified: data.verified || false,
                         promoted: data.promoted || false, 
                         warranty: data.warranty || false,
-                        legal: data.legal_status || "Nacional"
+                        legal: data.legal_status || "Nacional",
+                        is4x4: is4x4,
+                        date: date
                     };
                 });
                 
             } catch (err) {
                 console.error("Firebase Error:", err);
-                if (err.message.includes("requires an index")) {
+                if (err.message && err.message.includes("requires an index")) {
                     this.error = "Falta índice en Firebase (Revisa consola F12).";
                 } else {
                     this.error = "No se pudieron cargar los carros.";
@@ -85,7 +104,7 @@ window.app = function() {
         get filteredCars() {
             let list = this.cars;
 
-            // 1. Filter by Tab (Favorites vs Home)
+            // 1. Filter by Tab
             if (this.currentView === 'favorites') {
                 list = list.filter(car => this.favorites.includes(car.id));
             }
@@ -96,11 +115,9 @@ window.app = function() {
                 const lowerSearch = this.search.toLowerCase();
                 
                 result = list.filter(car => {
-                    // Text Match
                     const matchesText = car.model.toLowerCase().includes(lowerSearch) || 
                                       car.year.toString().includes(lowerSearch);
                     
-                    // Chip Logic
                     if (lowerSearch === 'trokas') {
                         return car.model.toLowerCase().includes('lobo') || 
                                car.model.toLowerCase().includes('sierra') ||
@@ -110,7 +127,7 @@ window.app = function() {
                     }
                     if (lowerSearch === 'nacional') return car.legal.toLowerCase() === 'nacional';
                     if (lowerSearch === 'economico') return car.price < 150000;
-                    if (lowerSearch === '4x4') return car.model.toLowerCase().includes('4x4');
+                    if (lowerSearch === '4x4') return car.is4x4 || car.model.toLowerCase().includes('4x4');
 
                     return matchesText || car.legal.toLowerCase().includes(lowerSearch);
                 });
@@ -120,24 +137,39 @@ window.app = function() {
             return result.sort((a, b) => {
                 if (a.promoted && !b.promoted) return -1;
                 if (!a.promoted && b.promoted) return 1;
-                return 0; // Keep original order
+                return 0; 
             });
         },
 
-        // Helper for Profile Tab
+        // VIEW HELPERS
         get profileView() {
             return this.currentView === 'profile';
         },
 
-        // UTILS
+        // FORMATTERS
         formatMoney(amount) {
             return new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN', maximumFractionDigits: 0 }).format(amount);
+        },
+
+        timeAgo(date) {
+            const seconds = Math.floor((new Date() - date) / 1000);
+            let interval = seconds / 31536000;
+            if (interval > 1) return Math.floor(interval) + " años";
+            interval = seconds / 2592000;
+            if (interval > 1) return Math.floor(interval) + " mes";
+            interval = seconds / 86400;
+            if (interval > 1) return Math.floor(interval) + "d";
+            interval = seconds / 3600;
+            if (interval > 1) return Math.floor(interval) + "h";
+            interval = seconds / 60;
+            if (interval > 1) return Math.floor(interval) + " min";
+            return "Hace instantes";
         },
 
         // UI ACTIONS
         openSearch() {
             this.searchOpen = true;
-            // Fix: Use getElementById to bypass Alpine scope issues
+            // Safe focus
             setTimeout(() => {
                 const input = document.getElementById('mobileSearchInput');
                 if (input) input.focus();
@@ -156,6 +188,21 @@ window.app = function() {
         closeCar() {
             this.selectedCar = null;
             document.body.style.overflow = 'auto';
+        },
+
+        // AUTH ACTIONS
+        login() {
+            this.loading = true;
+            setTimeout(() => {
+                this.isLoggedIn = true;
+                this.user = { name: "Usuario Demo", email: "demo@apson.com" };
+                this.loading = false;
+            }, 1000);
+        },
+
+        logout() {
+            this.isLoggedIn = false;
+            this.user = null;
         }
     }
 }
