@@ -7,7 +7,6 @@ import {
     signInWithEmailAndPassword, 
     createUserWithEmailAndPassword, 
     signInWithPopup,
-    getRedirectResult,  
     GoogleAuthProvider,
     signOut,
     onAuthStateChanged
@@ -82,26 +81,11 @@ window.app = function() {
 
         // --- LIFECYCLE ---
         async init() {
-            // alert("Debug: App Starting..."); // Uncomment if you suspect app isn't loading at all
-            
             const saved = localStorage.getItem('apson_favorites');
             if (saved) this.favorites = JSON.parse(saved);
 
-            try {
-                // Debugging Redirect
-                const result = await getRedirectResult(auth);
-                if (result) {
-                    // alert("Debug: Google returned user: " + result.user.email);
-                } else {
-                    // alert("Debug: No redirect result found.");
-                }
-            } catch (error) {
-                alert("Debug Error: " + error.message); // <--- THIS IS WHAT WE NEED TO SEE
-            }
-
             onAuthStateChanged(auth, (user) => {
                 if (user) {
-                    // alert("Debug: Auth Changed - LOGGED IN as " + user.email);
                     this.isLoggedIn = true;
                     this.user = { 
                         name: user.displayName || user.email.split('@')[0], 
@@ -114,7 +98,6 @@ window.app = function() {
                         setTimeout(() => { window.location.href = 'sell.html'; }, 500);
                     }
                 } else {
-                    // alert("Debug: Auth Changed - LOGGED OUT");
                     this.isLoggedIn = false;
                     this.user = null;
                 }
@@ -151,14 +134,21 @@ window.app = function() {
         async loginGoogle() {
             const provider = new GoogleAuthProvider();
             try {
-                // CHANGE: Use Popup instead of Redirect for better localhost support
-                await signInWithPopup(auth, provider);
-                
-                // Success! The onAuthStateChanged listener will handle the state update automatically.
-                
+                // Use signInWithPopup instead of signInWithRedirect
+                // This works better on iOS/Safari due to third-party cookie restrictions
+                const result = await signInWithPopup(auth, provider);
+                // Success is handled by onAuthStateChanged automatically
+                console.log("Google login successful:", result.user.email);
             } catch (err) {
                 console.error("Google Login Error:", err);
-                this.authError = "No se pudo iniciar con Google.";
+                // Handle popup blocked or closed by user
+                if (err.code === 'auth/popup-closed-by-user') {
+                    this.authError = "Cerraste la ventana de inicio de sesión.";
+                } else if (err.code === 'auth/popup-blocked') {
+                    this.authError = "Tu navegador bloqueó la ventana emergente. Permite pop-ups e intenta de nuevo.";
+                } else {
+                    this.authError = "No se pudo iniciar con Google: " + err.message;
+                }
             }
         },
 
