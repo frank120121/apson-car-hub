@@ -340,6 +340,7 @@ window.app = function() {
                         verified: data.verified || false,
                         promoted: data.promoted || false, 
                         warranty: data.warranty || false,
+                        description: data.description || null,
                         legal: data.legal_status || "Nacional",
                         is4x4: is4x4,
                         date: date

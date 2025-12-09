@@ -522,7 +522,7 @@
                             <div class="bg-gray-50 p-3 rounded-xl border border-gray-100"><p class="text-xs text-gray-400 font-bold uppercase">Legal</p><p class="font-bold text-gray-800" x-text="selectedCar.legal"></p></div>
                             <div class="bg-gray-50 p-3 rounded-xl border border-gray-100"><p class="text-xs text-gray-400 font-bold uppercase">Kilometraje</p><p class="font-bold text-gray-800" x-text="selectedCar.km + ' km'"></p></div>
                         </div>
-                        <div class="mb-24"><h3 class="font-bold text-gray-900 mb-2">Descripción</h3><p class="text-gray-500 leading-relaxed text-sm">Excelente oportunidad. Unidad revisada mecánicamente. Documentación en regla. Listo para carretera.</p></div>
+                        <div class="mb-24"><h3 class="font-bold text-gray-900 mb-2">Descripción</h3><p class="text-gray-500 leading-relaxed text-sm" x-text="selectedCar.description || 'Sin descripción detallada.'"></p></div>
                     </div>
                 </template>
             </div>

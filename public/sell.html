@@ -94,24 +94,40 @@
             </div>
 
             <div class="grid grid-cols-2 gap-4">
-                <div>
-                    <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Tipo de Auto</label>
-                    <select x-model="form.type" class="w-full p-3 bg-white border border-gray-300 rounded-lg outline-none font-semibold appearance-none">
-                        <template x-for="type in types">
-                            <option :value="type" x-text="type"></option>
-                        </template>
-                    </select>
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Precio (MXN)</label>
-                    <div class="relative">
-                        <span class="absolute left-3 top-3 text-gray-400 font-bold">$</span>
-                        <input type="number" x-model="form.price" class="w-full p-3 pl-7 bg-white border border-gray-300 rounded-lg text-lg font-bold text-green-700 outline-none focus:border-green-500" placeholder="0">
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Tipo</label>
+                        <select x-model="form.type" class="w-full p-3 bg-white border border-gray-300 rounded-lg outline-none font-semibold appearance-none">
+                            <template x-for="type in types">
+                                <option :value="type" x-text="type"></option>
+                            </template>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Kilometraje</label>
+                        <div class="relative">
+                            <input type="number" x-model="form.km" class="w-full p-3 pr-8 bg-white border border-gray-300 rounded-lg font-semibold outline-none focus:border-blue-500" placeholder="0">
+                            <span class="absolute right-3 top-3 text-gray-400 text-xs font-bold">km</span>
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            <div class="grid grid-cols-2 gap-4">
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Transmisión</label>
+                        <select x-model="form.trans" class="w-full p-3 bg-white border border-gray-300 rounded-lg outline-none">
+                            <option value="Auto">Automática</option>
+                            <option value="Std">Estándar</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Precio</label>
+                        <div class="relative">
+                            <span class="absolute left-3 top-3 text-gray-400 font-bold">$</span>
+                            <input type="number" x-model="form.price" class="w-full p-3 pl-7 bg-white border border-gray-300 rounded-lg text-lg font-bold text-green-700 outline-none focus:border-green-500" placeholder="0">
+                        </div>
+                    </div>
+                </div>
+
                 <div>
                     <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Estatus Legal</label>
                     <select x-model="form.legal" class="w-full p-3 bg-white border border-gray-300 rounded-lg outline-none">
@@ -120,12 +136,10 @@
                         <option value="Fronterizo">Fronterizo</option>
                     </select>
                 </div>
+
                 <div>
-                    <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Transmisión</label>
-                    <select x-model="form.trans" class="w-full p-3 bg-white border border-gray-300 rounded-lg outline-none">
-                        <option value="Auto">Automática</option>
-                        <option value="Std">Estándar</option>
-                    </select>
+                    <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Descripción / Notas</label>
+                    <textarea x-model="form.desc" rows="3" class="w-full p-3 bg-white border border-gray-300 rounded-lg font-medium outline-none focus:border-blue-500 resize-none" placeholder="Ej. Llantas nuevas, A/C frío, sonido Bose, único dueño..."></textarea>
                 </div>
             </div>
         </div>

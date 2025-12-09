@@ -47,10 +47,12 @@ window.sellApp = function() {
         form: {
             year: new Date().getFullYear(),
             make: 'Ford',
-            model: 'Lobo',     // Selected from dropdown
-            trim: '',          // Typed manually (e.g. Lariat)
+            model: 'Lobo',
+            trim: '',
             type: 'Pickup',
             price: '',
+            km: '',           // <--- NEW: Mileage
+            desc: '',         // <--- NEW: Description
             legal: 'Importado',
             trans: 'Auto'
         },
@@ -93,6 +95,7 @@ window.sellApp = function() {
         async submitCar() {
             if (this.files.length === 0) return alert("¡Debes subir al menos 1 foto!");
             if (!this.form.price) return alert("Escribe el precio.");
+            if (!this.form.km) return alert("Escribe el kilometraje.");
 
             this.uploading = true;
 
@@ -119,17 +122,17 @@ window.sellApp = function() {
                     trim: this.form.trim,
                     body_type: this.form.type,
                     
-                    // Main display string
-                    model: fullModelString, 
-                    
+                    model: fullModelString,
                     year: parseInt(this.form.year),
                     price: parseInt(this.form.price),
+                    mileage: parseInt(this.form.km),    
+                    description: this.form.desc,        
+                    
                     legal_status: this.form.legal,
                     transmission: this.form.trans,
                     images: imageUrls,
                     verified: false,
                     warranty: false,
-                    mileage: "0",
                     created_at: serverTimestamp()
                 });
 
