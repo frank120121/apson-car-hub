@@ -6,7 +6,6 @@
     <title>Vender Auto - Apson Car Hub</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
-    
     <script type="module" src="./js/sell.js"></script>
 
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
@@ -24,45 +23,91 @@
     <main class="p-5 max-w-md mx-auto">
         
         <div class="mb-6">
-            <label class="block text-sm font-bold text-gray-700 mb-2">Foto Principal</label>
+            <div class="flex justify-between items-end mb-2">
+                <label class="block text-sm font-bold text-gray-700">Fotos del Auto</label>
+                <span class="text-xs text-gray-400" x-text="files.length + '/5 fotos'"></span>
+            </div>
             
-            <div class="relative aspect-video bg-gray-200 rounded-xl overflow-hidden border-2 border-dashed border-gray-300 flex flex-col justify-center items-center cursor-pointer active:scale-95 transition-transform" 
+            <div x-show="files.length === 0" 
+                 class="relative aspect-video bg-gray-100 rounded-xl border-2 border-dashed border-gray-300 flex flex-col justify-center items-center cursor-pointer active:scale-95 transition-transform hover:bg-gray-50" 
                  @click="$refs.fileInput.click()">
-                
-                <div x-show="!previewUrl" class="text-gray-400 flex flex-col items-center">
-                    <div class="p-3 bg-white rounded-full shadow-sm mb-2">
-                        <svg class="w-6 h-6 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
-                    </div>
-                    <span class="text-xs font-bold uppercase tracking-wide">Tocar para subir</span>
+                <div class="p-3 bg-white rounded-full shadow-sm mb-2">
+                    <svg class="w-6 h-6 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
                 </div>
-
-                <img x-show="previewUrl" :src="previewUrl" class="absolute inset-0 w-full h-full object-cover">
-                
-                <div x-show="previewUrl" class="absolute bottom-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded backdrop-blur-sm">
-                    Cambiar
-                </div>
+                <span class="text-xs font-bold uppercase tracking-wide text-gray-500">Subir Fotos</span>
             </div>
 
-            <input x-ref="fileInput" type="file" accept="image/*" class="hidden" @change="handleFile($event)">
+            <div x-show="files.length > 0" class="flex gap-3 overflow-x-auto pb-2 snap-x">
+                <div x-show="files.length < 5" 
+                     class="snap-start shrink-0 w-24 h-24 bg-gray-100 rounded-lg border-2 border-dashed border-gray-300 flex flex-col justify-center items-center cursor-pointer active:scale-95"
+                     @click="$refs.fileInput.click()">
+                    <span class="text-2xl text-gray-400">+</span>
+                    <span class="text-[10px] font-bold text-gray-500">Agregar</span>
+                </div>
+
+                <template x-for="(url, index) in previewUrls" :key="index">
+                    <div class="snap-start shrink-0 w-32 aspect-video relative rounded-lg overflow-hidden shadow-sm border border-gray-200">
+                        <img :src="url" class="w-full h-full object-cover">
+                        <button @click="removeFile(index)" class="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 shadow-md active:scale-90">
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                        </button>
+                    </div>
+                </template>
+            </div>
+
+            <input x-ref="fileInput" type="file" multiple accept="image/*" class="hidden" @change="handleFile($event)">
         </div>
 
         <div class="space-y-4">
-            <div class="grid grid-cols-3 gap-4">
-                <div class="col-span-1">
+            <div class="grid grid-cols-2 gap-4">
+                <div>
                     <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Año</label>
-                    <input type="number" x-model="form.year" class="w-full p-3 bg-white border border-gray-300 rounded-lg font-semibold text-center outline-none focus:border-blue-500" placeholder="2015">
+                    <select x-model="form.year" class="w-full p-3 bg-white border border-gray-300 rounded-lg font-semibold outline-none focus:border-blue-500 appearance-none">
+                        <template x-for="year in years">
+                            <option :value="year" x-text="year"></option>
+                        </template>
+                    </select>
                 </div>
-                <div class="col-span-2">
-                    <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Modelo</label>
-                    <input type="text" x-model="form.model" class="w-full p-3 bg-white border border-gray-300 rounded-lg font-semibold outline-none focus:border-blue-500" placeholder="Ej. Ford Lobo Lariat">
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Marca</label>
+                    <select x-model="form.make" class="w-full p-3 bg-white border border-gray-300 rounded-lg font-semibold outline-none focus:border-blue-500 appearance-none">
+                        <template x-for="make in makes">
+                            <option :value="make" x-text="make"></option>
+                        </template>
+                    </select>
                 </div>
             </div>
 
-            <div>
-                <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Precio (Pesos)</label>
-                <div class="relative">
-                    <span class="absolute left-3 top-3 text-gray-400 font-bold">$</span>
-                    <input type="number" x-model="form.price" class="w-full p-3 pl-7 bg-white border border-gray-300 rounded-lg text-lg font-bold text-green-700 outline-none focus:border-green-500" placeholder="250000">
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Modelo</label>
+                    <select x-model="form.model" class="w-full p-3 bg-white border border-gray-300 rounded-lg font-semibold outline-none focus:border-blue-500 appearance-none">
+                        <template x-for="model in availableModels">
+                            <option :value="model" x-text="model"></option>
+                        </template>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Versión / Trim</label>
+                    <input type="text" x-model="form.trim" class="w-full p-3 bg-white border border-gray-300 rounded-lg font-semibold outline-none focus:border-blue-500" placeholder="Ej. Lariat, GT, S">
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Tipo de Auto</label>
+                    <select x-model="form.type" class="w-full p-3 bg-white border border-gray-300 rounded-lg outline-none font-semibold appearance-none">
+                        <template x-for="type in types">
+                            <option :value="type" x-text="type"></option>
+                        </template>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Precio (MXN)</label>
+                    <div class="relative">
+                        <span class="absolute left-3 top-3 text-gray-400 font-bold">$</span>
+                        <input type="number" x-model="form.price" class="w-full p-3 pl-7 bg-white border border-gray-300 rounded-lg text-lg font-bold text-green-700 outline-none focus:border-green-500" placeholder="0">
+                    </div>
                 </div>
             </div>
 
@@ -87,7 +132,7 @@
 
         <div class="mt-8">
             <button @click="submitCar" 
-                    :disabled="uploading || !file"
+                    :disabled="uploading || files.length === 0"
                     class="w-full py-4 bg-blue-600 text-white font-bold text-lg rounded-xl shadow-lg shadow-blue-200 active:scale-95 transition-all flex justify-center items-center gap-2 disabled:bg-gray-300 disabled:shadow-none disabled:cursor-not-allowed">
                 
                 <span x-show="!uploading">Publicar Ahora</span>
@@ -97,7 +142,7 @@
                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                         <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                     </svg>
-                    Subiendo...
+                    Subiendo fotos...
                 </span>
             </button>
             <p class="text-center text-xs text-gray-400 mt-4">Al publicar aceptas los términos de ApsonCarHub</p>
