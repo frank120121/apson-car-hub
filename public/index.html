@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>NexCar | Tu Próximo Auto</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -26,10 +26,12 @@
         .group-hover\:animate-shimmer:hover { animation: shimmer 1.5s infinite; }
         @keyframes progress { 0% { width: 0%; } 100% { width: 100%; } }
         .animate-progress { animation: progress 2s ease-out forwards; }
+        .ease-spring { transition-timing-function: cubic-bezier(0.175, 0.885, 0.32, 1.1); }
+        .ease-out-expo { transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1); }
     </style>
 </head>
 
-<body class="bg-gray-50 pb-24 select-none" x-data="app()">
+<body class="bg-gray-50 pb-24 select-none antialiased" x-data="app()">
     <!-- INTRO/SPLASH SCREEN -->
     <div x-show="introOpen" 
         class="fixed inset-0 z-[100] bg-white flex flex-col items-center justify-center p-6 transition-all duration-700 ease-in-out"
@@ -84,7 +86,7 @@
     </div>
 
     <!-- HEADER -->
-    <header class="fixed top-0 w-full z-40 bg-white/90 backdrop-blur-md border-b border-gray-200 transition-transform duration-300 ease-in-out"
+    <header class="fixed top-0 w-full z-40 bg-white/80 backdrop-blur-md backdrop-saturate-150 border-b border-gray-200/50 transition-transform duration-300 ease-in-out"
             :class="visible ? 'translate-y-0' : '-translate-y-full'"
             x-data="{ 
                 visible: true, 
@@ -146,10 +148,10 @@
                     <input type="text" class="w-full bg-transparent text-sm text-gray-700 placeholder-gray-400 outline-none" :placeholder="placeholder" readonly>
                 </div>
             </div>
-            <button @click="openFilter()" class="w-10 h-10 flex items-center justify-center bg-white border border-gray-200 rounded-lg shadow-sm active:scale-90 transition-transform">
+            <button @click="openFilter()" class="w-10 h-10 flex items-center justify-center bg-gray-100 border-none focus:bg-white focus:ring-2 rounded-lg shadow-sm active:scale-90 transition-transform">
                 <svg class="w-5 h-5" fill="#1351EC" viewBox="0 0 1024 1024"><path d="M345.143 245.029c-55.291 0-100.114 44.823-100.114 100.114s44.823 100.114 100.114 100.114c55.291 0 100.114-44.823 100.114-100.114s-44.823-100.114-100.114-100.114zM345.143 178.286c80.725 0 148.056 57.326 163.52 133.486h437.166c18.429 0 33.371 14.943 33.371 33.371s-14.943 33.371-33.371 33.371h-437.166c-15.464 76.161-82.795 133.486-163.52 133.486s-148.058-57.324-163.52-133.486h-103.451c-18.429 0-33.371-14.943-33.371-33.371s14.943-33.371 33.371-33.371h103.451c15.462-76.16 82.794-133.486 163.52-133.486zM678.857 578.743c-55.29 0-100.114 44.824-100.114 100.114s44.824 100.114 100.114 100.114c55.29 0 100.114-44.824 100.114-100.114s-44.824-100.114-100.114-100.114zM678.857 512c80.725 0 148.056 57.324 163.52 133.486h103.451c18.429 0 33.371 14.943 33.371 33.371s-14.943 33.371-33.371 33.371h-103.451c-15.464 76.161-82.795 133.486-163.52 133.486s-148.056-57.324-163.52-133.486h-437.166c-18.429 0-33.371-14.943-33.371-33.371s14.943-33.371 33.371-33.371h437.166c15.464-76.161 82.795-133.486 163.52-133.486z"></path></svg>
             </button>
-            <button @click="openSort()" class="w-10 h-10 flex items-center justify-center bg-white border border-gray-200 rounded-lg shadow-sm active:scale-90 transition-transform">
+            <button @click="openSort()" class="w-10 h-10 flex items-center justify-center bg-gray-100 border-none focus:bg-white focus:ring-2 rounded-lg shadow-sm active:scale-90 transition-transform">
                 <svg class="w-5 h-5" fill="none" stroke="#1351EC" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"></path></svg>
             </button>
         </div>
@@ -212,7 +214,7 @@
             <div class="grid gap-5">
                 <template x-for="(car, index) in filteredCars" :key="car.id">
                     <div class="contents">
-                        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden active:scale-95 transition-transform duration-100" @click="openCar(car)">
+                        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden active:scale-95 transition-transform duration-100 ease-out-expo" @click="openCar(car)">
                             <div class="relative h-56 bg-gray-200">
                                 <img :src="car.image" src="https://placehold.co/600x400?text=Cargando..." class="w-full h-full object-cover" :loading="index < 2 ? 'eager' : 'lazy'" :fetchpriority="index < 2 ? 'high' : 'auto'" alt="Foto del auto">
                                 <div class="absolute top-0 right-0 left-0 flex justify-between p-2 z-10">
@@ -359,7 +361,7 @@
                         </span>
                     </button>
 
-                    <button @click="loginGoogle()" class="w-full py-4 bg-white border border-gray-200 text-gray-700 font-bold rounded-xl active:bg-gray-50 transition-all flex items-center justify-center gap-2">
+                    <button @click="loginGoogle()" class="w-full py-4 bg-gray-100 border-none focus:bg-white focus:ring-2 text-gray-700 font-bold rounded-xl active:bg-gray-50 transition-all flex items-center justify-center gap-2">
                         <img src="https://www.svgrepo.com/show/475656/google-color.svg" class="w-5 h-5"> 
                         Continuar con Google
                     </button>
@@ -407,7 +409,7 @@
                     
                     <div class="grid gap-3 mb-8">
                         <template x-if="isApprovedSeller">
-                            <a href="sell.html" class="flex items-center gap-4 p-4 bg-white border border-gray-100 rounded-2xl shadow-sm active:scale-95 transition-transform">
+                            <a href="sell.html" class="flex items-center gap-4 p-4 bg-gray-100 border-none focus:bg-white focus:ring-2 rounded-2xl shadow-sm active:scale-95 transition-transform">
                                 <div class="w-10 h-10 bg-green-100 text-green-600 rounded-full flex items-center justify-center">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
                                 </div>
@@ -432,7 +434,7 @@
                         </template>
                         
                         <template x-if="!isApprovedSeller && !isPendingSeller">
-                            <button @click="sellerModalOpen = true" class="flex items-center gap-4 p-4 bg-white border border-gray-100 rounded-2xl shadow-sm active:scale-95 transition-transform">
+                            <button @click="sellerModalOpen = true" class="flex items-center gap-4 p-4 bg-gray-100 border-none focus:bg-white focus:ring-2 rounded-2xl shadow-sm active:scale-95 transition-transform">
                                 <div class="w-10 h-10 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
                                 </div>
@@ -444,7 +446,7 @@
                             </button>
                         </template>
 
-                        <button class="flex items-center gap-4 p-4 bg-white border border-gray-100 rounded-2xl shadow-sm active:scale-95 transition-transform">
+                        <button class="flex items-center gap-4 p-4 bg-gray-100 border-none focus:bg-white focus:ring-2 rounded-2xl shadow-sm active:scale-95 transition-transform">
                             <div class="w-10 h-10 bg-purple-100 text-purple-600 rounded-full flex items-center justify-center">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
                             </div>
@@ -461,7 +463,7 @@
     </main>
 
     <!-- BOTTOM NAVIGATION -->
-    <nav class="fixed bottom-6 left-4 right-4 bg-white/90 backdrop-blur-md border border-gray-100 rounded-2xl flex justify-between items-center px-4 h-16 z-50 shadow-2xl transition-all duration-300">
+    <nav class="fixed bottom-6 left-4 right-4 bg-white/80 backdrop-blur-md backdrop-saturate-150 border border-white/20 rounded-2xl flex justify-between items-center px-4 h-16 z-50 shadow-2xl transition-all duration-300">
         <button @click="currentView = 'home'; window.scrollTo({top:0})" class="flex items-center justify-center w-full h-full active:scale-90 transition-transform" :class="currentView === 'home' && !searchOpen ? 'text-blue-600' : 'text-gray-400'">
             <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
         </button>
@@ -483,7 +485,7 @@
 
     <!-- CAR DETAIL MODAL -->
     <div x-show="selectedCar" style="display: none;" class="fixed inset-0 z-[60] flex justify-end"
-         x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-x-full" x-transition:enter-end="opacity-100 translate-x-0"
+         x-transition:enter="transition duration-500 ease-out-expo" x-transition:enter-start="opacity-0 translate-x-full" x-transition:enter-end="opacity-100 translate-x-0"
          x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100 translate-x-0" x-transition:leave-end="opacity-0 translate-x-full">
         <div class="w-full h-full bg-white flex flex-col relative">
             <button @click="closeCar()" class="absolute top-4 left-4 z-20 bg-white/90 p-2 rounded-full shadow-md active:scale-90 transition-transform backdrop-blur">

@@ -62,7 +62,7 @@
             <div class="grid grid-cols-2 gap-4">
                 <div>
                     <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Año</label>
-                    <select x-model="form.year" class="w-full p-3 bg-white border border-gray-300 rounded-lg font-semibold outline-none focus:border-blue-500 appearance-none">
+                    <select x-model="form.year" class="w-full p-3 bg-gray-100 border-none focus:bg-white focus:ring-2 rounded-lg font-semibold outline-none focus:border-blue-500 appearance-none">
                         <template x-for="year in years">
                             <option :value="year" x-text="year"></option>
                         </template>
@@ -70,7 +70,7 @@
                 </div>
                 <div>
                     <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Marca</label>
-                    <select x-model="form.make" class="w-full p-3 bg-white border border-gray-300 rounded-lg font-semibold outline-none focus:border-blue-500 appearance-none">
+                    <select x-model="form.make" class="w-full p-3 bg-gray-100 border-none focus:bg-white focus:ring-2 rounded-lg font-semibold outline-none focus:border-blue-500 appearance-none">
                         <template x-for="make in makes">
                             <option :value="make" x-text="make"></option>
                         </template>
@@ -80,23 +80,28 @@
 
             <div class="grid grid-cols-2 gap-4">
                 <div>
-                    <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Modelo</label>
-                    <select x-model="form.model" class="w-full p-3 bg-white border border-gray-300 rounded-lg font-semibold outline-none focus:border-blue-500 appearance-none">
-                        <template x-for="model in availableModels">
-                            <option :value="model" x-text="model"></option>
-                        </template>
-                    </select>
+                    <label class="block text-xs font-bold text-gray-400 uppercase mb-2 ml-1">Modelo</label>
+                    <div class="relative">
+                        <select x-model="form.model" class="w-full p-4 bg-gray-100 text-gray-900 rounded-2xl border-none outline-none appearance-none font-semibold">
+                            <template x-for="model in availableModels">
+                                <option :value="model" x-text="model"></option>
+                            </template>
+                        </select>
+                        <div class="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-500">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </div>
+                    </div>
                 </div>
                 <div>
-                    <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Versión / Trim</label>
-                    <input type="text" x-model="form.trim" class="w-full p-3 bg-white border border-gray-300 rounded-lg font-semibold outline-none focus:border-blue-500" placeholder="Ej. Lariat, GT, S">
+                    <label class="block text-xs font-bold text-gray-400 uppercase mb-2 ml-1">Versión</label>
+                    <input type="text" x-model="form.trim" class="w-full p-4 bg-gray-100 text-gray-900 rounded-2xl border-none outline-none focus:bg-white focus:ring-2 focus:ring-blue-500 transition-all font-semibold" placeholder="Ej. Lariat">
                 </div>
             </div>
 
             <div class="grid grid-cols-2 gap-4">
                     <div>
                         <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Tipo</label>
-                        <select x-model="form.type" class="w-full p-3 bg-white border border-gray-300 rounded-lg outline-none font-semibold appearance-none">
+                        <select x-model="form.type" class="w-full p-3 bg-gray-100 border-none focus:bg-white focus:ring-2 rounded-lg outline-none font-semibold appearance-none">
                             <template x-for="type in types">
                                 <option :value="type" x-text="type"></option>
                             </template>
@@ -105,7 +110,7 @@
                     <div>
                         <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Kilometraje</label>
                         <div class="relative">
-                            <input type="number" x-model="form.km" class="w-full p-3 pr-8 bg-white border border-gray-300 rounded-lg font-semibold outline-none focus:border-blue-500" placeholder="0">
+                            <input type="number" x-model="form.km" class="w-full p-3 pr-8 bg-gray-100 border-none focus:bg-white focus:ring-2 rounded-lg font-semibold outline-none focus:border-blue-500" placeholder="0">
                             <span class="absolute right-3 top-3 text-gray-400 text-xs font-bold">km</span>
                         </div>
                     </div>
@@ -114,7 +119,7 @@
                 <div class="grid grid-cols-2 gap-4">
                     <div>
                         <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Transmisión</label>
-                        <select x-model="form.trans" class="w-full p-3 bg-white border border-gray-300 rounded-lg outline-none">
+                        <select x-model="form.trans" class="w-full p-3 bg-gray-100 border-none focus:bg-white focus:ring-2 rounded-lg outline-none">
                             <option value="Auto">Automática</option>
                             <option value="Std">Estándar</option>
                         </select>
@@ -123,14 +128,14 @@
                         <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Precio</label>
                         <div class="relative">
                             <span class="absolute left-3 top-3 text-gray-400 font-bold">$</span>
-                            <input type="number" x-model="form.price" class="w-full p-3 pl-7 bg-white border border-gray-300 rounded-lg text-lg font-bold text-green-700 outline-none focus:border-green-500" placeholder="0">
+                            <input type="number" x-model="form.price" class="w-full p-3 pl-7 bg-gray-100 border-none focus:bg-white focus:ring-2 rounded-lg text-lg font-bold text-green-700 outline-none focus:border-green-500" placeholder="0">
                         </div>
                     </div>
                 </div>
 
                 <div>
                     <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Estatus Legal</label>
-                    <select x-model="form.legal" class="w-full p-3 bg-white border border-gray-300 rounded-lg outline-none">
+                    <select x-model="form.legal" class="w-full p-3 bg-gray-100 border-none focus:bg-white focus:ring-2 rounded-lg outline-none">
                         <option value="Importado">Importado</option>
                         <option value="Nacional">Nacional</option>
                         <option value="Fronterizo">Fronterizo</option>
@@ -139,7 +144,7 @@
 
                 <div>
                     <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Descripción / Notas</label>
-                    <textarea x-model="form.desc" rows="3" class="w-full p-3 bg-white border border-gray-300 rounded-lg font-medium outline-none focus:border-blue-500 resize-none" placeholder="Ej. Llantas nuevas, A/C frío, sonido Bose, único dueño..."></textarea>
+                    <textarea x-model="form.desc" rows="3" class="w-full p-3 bg-gray-100 border-none focus:bg-white focus:ring-2 rounded-lg font-medium outline-none focus:border-blue-500 resize-none" placeholder="Ej. Llantas nuevas, A/C frío, sonido Bose, único dueño..."></textarea>
                 </div>
             </div>
         </div>
