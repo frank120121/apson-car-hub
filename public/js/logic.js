@@ -7,9 +7,8 @@ import {
     signInWithEmailAndPassword, 
     createUserWithEmailAndPassword, 
     signInWithPopup,
-    signInWithPhoneNumber,
-    RecaptchaVerifier,
     updateProfile,
+    sendEmailVerification, // <--- NEW IMPORT
     GoogleAuthProvider,
     signOut,
     onAuthStateChanged
@@ -22,7 +21,6 @@ window.app = function() {
         // --- DATA ---
         cars: [],
         favorites: [],
-
         promos: [
             {
                 title: "¿Te falta capital?",
@@ -52,12 +50,13 @@ window.app = function() {
                 tag: "Garantía"
             }
         ],
-
+        
         // --- UI STATE ---
         currentView: 'home',
         selectedCar: null,
         loading: true,
         error: null,
+        signupIntent: 'buy', // 'buy' or 'sell'
         
         // --- MODAL STATES ---
         searchOpen: false,
@@ -79,14 +78,9 @@ window.app = function() {
         isLoggedIn: false,
         user: null,
         userProfile: null,
-        authMode: 'login',
-        authMethod: 'email',    // 'email' or 'phone'
+        authMode: 'login', // 'login' or 'register'
         email: '',
         password: '',
-        phone: '',
-        verificationCode: '',
-        confirmationResult: null,
-        codeSent: false,
         displayName: '',
         authError: null,
 
@@ -116,16 +110,16 @@ window.app = function() {
                         uid: user.uid,
                         name: user.displayName || this.userProfile?.name || user.email.split('@')[0], 
                         email: user.email, 
-                        photo: user.photoURL || this.userProfile?.photo || null
+                        photo: user.photoURL || this.userProfile?.photo || null,
+                        emailVerified: user.emailVerified // Track verification status
                     };
                     
+                    // Handle pending actions
                     if (localStorage.getItem('pending_sell_action')) {
                         localStorage.removeItem('pending_sell_action');
-                        // Check if user is approved seller before redirecting
                         if (this.userProfile?.sellerStatus === 'approved') {
                             setTimeout(() => { window.location.href = 'sell.html'; }, 500);
                         } else {
-                            // Show seller request modal or message
                             setTimeout(() => { this.sellerModalOpen = true; }, 500);
                         }
                     }
@@ -161,7 +155,8 @@ window.app = function() {
                     email: data.email || null,
                     phone: data.phone || null,
                     photo: data.photo || null,
-                    sellerStatus: 'none', // none, pending, approved, rejected
+                    sellerStatus: 'none',
+                    intent: this.signupIntent,
                     createdAt: new Date(),
                     updatedAt: new Date()
                 });
@@ -176,116 +171,46 @@ window.app = function() {
             }
         },
 
-        async requestSellerAccess() {
-            // Legacy method - now using submitSellerRequest
-            this.sellerModalOpen = true;
-        },
-
-        // Seller form validation
-        get canSubmitSellerForm() {
-            const hasType = this.sellerForm.type !== '';
-            const hasVolume = this.sellerForm.volume !== '';
-            const hasCity = this.sellerForm.city.trim().length >= 2;
-            const hasBusinessName = this.sellerForm.type === 'dealer' ? this.sellerForm.businessName.trim().length >= 2 : true;
-            
-            // Only require phone if not already on file
-            const hasPhone = this.userProfile?.phone || this.sellerForm.phone.trim().length >= 10;
-            
-            return hasType && hasVolume && hasPhone && hasCity && hasBusinessName;
-        },
-
-        get needsPhoneForSeller() {
-            return !this.userProfile?.phone;
-        },
-
-        resetSellerForm() {
-            this.sellerForm = {
-                type: '',
-                businessName: '',
-                volume: '',
-                phone: '',
-                city: ''
-            };
-        },
-
-        async submitSellerRequest() {
-            if (!this.user || !this.canSubmitSellerForm) return;
-            
-            this.sellerFormLoading = true;
-            
-            // Use existing phone or new one from form
-            const phoneNumber = this.userProfile?.phone || this.sellerForm.phone.trim();
-            
-            try {
-                await setDoc(doc(db, "users", this.user.uid), {
-                    ...this.userProfile,
-                    phone: phoneNumber, // Update phone if provided
-                    sellerStatus: 'pending',
-                    sellerRequest: {
-                        type: this.sellerForm.type,
-                        businessName: this.sellerForm.businessName || null,
-                        volume: this.sellerForm.volume,
-                        phone: phoneNumber,
-                        city: this.sellerForm.city.trim(),
-                        requestedAt: new Date()
-                    },
-                    updatedAt: new Date()
-                }, { merge: true });
-                
-                this.userProfile.sellerStatus = 'pending';
-                this.userProfile.phone = phoneNumber;
-                this.sellerModalOpen = false;
-                this.resetSellerForm();
-                
-                // Show success message
-                alert('¡Solicitud enviada! Te contactaremos pronto por WhatsApp.');
-                
-            } catch (err) {
-                console.error("Error submitting seller request:", err);
-                alert('Error al enviar solicitud. Intenta de nuevo.');
-            } finally {
-                this.sellerFormLoading = false;
-            }
-        },
-
-        // --- AUTH ACTIONS ---
+        // --- AUTH ACTIONS (Email Only) ---
         async submitAuth() {
             this.authError = null;
-            
-            if (this.authMethod === 'phone') {
-                await this.submitPhoneAuth();
-            } else {
-                await this.submitEmailAuth();
-            }
-        },
-
-        async submitEmailAuth() {
             this.loading = true;
             
             try {
                 if (this.authMode === 'login') {
+                    // LOGIN
                     await signInWithEmailAndPassword(auth, this.email, this.password);
                 } else {
-                    // Registration - require name
+                    // REGISTER
                     if (!this.displayName.trim()) {
                         this.authError = "Por favor ingresa tu nombre.";
                         this.loading = false;
                         return;
                     }
                     
+                    // 1. Create Account
                     const userCredential = await createUserWithEmailAndPassword(auth, this.email, this.password);
                     
-                    // Update Firebase Auth profile with display name
+                    // 2. Update Name
                     await updateProfile(userCredential.user, {
                         displayName: this.displayName.trim()
                     });
                     
-                    // Create user profile in Firestore
+                    // 3. Create DB Profile
                     await this.createUserProfile(userCredential.user.uid, {
                         name: this.displayName.trim(),
                         email: this.email,
                         phone: null
                     });
+
+                    // 4. Send Verification Email (THE FREE "OTP" ALTERNATIVE)
+                    await sendEmailVerification(userCredential.user);
+                    alert("¡Cuenta creada! Hemos enviado un enlace a tu correo para verificarlo.");
+
+                    // 5. Trigger Seller Flow if needed
+                    if (this.signupIntent === 'sell') {
+                        setTimeout(() => { this.sellerModalOpen = true; }, 500);
+                    }
                 }
             } catch (err) {
                 console.error("Auth Error", err);
@@ -294,116 +219,33 @@ window.app = function() {
                 else if (err.code === 'auth/email-already-in-use') this.authError = "El correo ya está registrado.";
                 else if (err.code === 'auth/weak-password') this.authError = "La contraseña debe tener 6 caracteres.";
                 else if (err.code === 'auth/invalid-credential') this.authError = "Credenciales inválidas.";
-                else this.authError = "Error al iniciar sesión.";
+                else this.authError = "Error al iniciar sesión: " + err.message;
             } finally {
                 this.loading = false;
             }
-        },
-
-        async setupRecaptcha() {
-            if (!window.recaptchaVerifier) {
-                window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
-                    'size': 'invisible',
-                    'callback': (response) => {
-                        // reCAPTCHA solved
-                    }
-                });
-            }
-        },
-
-        async submitPhoneAuth() {
-            this.loading = true;
-            
-            try {
-                if (!this.codeSent) {
-                    // Step 1: Send verification code
-                    await this.setupRecaptcha();
-                    
-                    // Format phone number (add Mexico code if needed)
-                    let phoneNumber = this.phone.trim().replace(/\s/g, '');
-                    if (!phoneNumber.startsWith('+')) {
-                        phoneNumber = '+52' + phoneNumber.replace(/^52/, '');
-                    }
-                    
-                    const confirmationResult = await signInWithPhoneNumber(auth, phoneNumber, window.recaptchaVerifier);
-                    this.confirmationResult = confirmationResult;
-                    this.codeSent = true;
-                    this.authError = null;
-                } else {
-                    // Step 2: Verify code
-                    const result = await this.confirmationResult.confirm(this.verificationCode);
-                    
-                    // Check if user profile exists
-                    const userDoc = await getDoc(doc(db, "users", result.user.uid));
-                    if (!userDoc.exists()) {
-                        // New user - create profile
-                        const name = this.displayName.trim() || 'Usuario';
-                        await this.createUserProfile(result.user.uid, {
-                            name: name,
-                            email: null,
-                            phone: this.phone.trim()
-                        });
-                        
-                        if (this.displayName.trim()) {
-                            await updateProfile(result.user, { displayName: name });
-                        }
-                    }
-                    
-                    // Reset phone auth state
-                    this.codeSent = false;
-                    this.verificationCode = '';
-                    this.confirmationResult = null;
-                }
-            } catch (err) {
-                console.error("Phone Auth Error", err);
-                if (err.code === 'auth/invalid-phone-number') this.authError = "Número de teléfono inválido.";
-                else if (err.code === 'auth/invalid-verification-code') this.authError = "Código incorrecto. Intenta de nuevo.";
-                else if (err.code === 'auth/too-many-requests') this.authError = "Demasiados intentos. Espera unos minutos.";
-                else if (err.code === 'auth/code-expired') {
-                    this.authError = "El código expiró. Solicita uno nuevo.";
-                    this.codeSent = false;
-                }
-                else this.authError = "Error: " + err.message;
-            } finally {
-                this.loading = false;
-            }
-        },
-
-        resendCode() {
-            this.codeSent = false;
-            this.verificationCode = '';
-            this.confirmationResult = null;
-            window.recaptchaVerifier = null;
-            this.submitAuth();
         },
 
         async loginGoogle() {
             const provider = new GoogleAuthProvider();
             try {
                 const result = await signInWithPopup(auth, provider);
-                
-                // Check if user profile exists, if not create one
                 const userDoc = await getDoc(doc(db, "users", result.user.uid));
+                
                 if (!userDoc.exists()) {
                     await this.createUserProfile(result.user.uid, {
                         name: result.user.displayName || result.user.email.split('@')[0],
                         email: result.user.email,
                         photo: result.user.photoURL
                     });
+                    if (this.signupIntent === 'sell') {
+                        setTimeout(() => { this.sellerModalOpen = true; }, 500);
+                    }
                 } else {
                     this.userProfile = userDoc.data();
                 }
-                
-                console.log("Google login successful:", result.user.email);
             } catch (err) {
                 console.error("Google Login Error:", err);
-                if (err.code === 'auth/popup-closed-by-user') {
-                    this.authError = "Cerraste la ventana de inicio de sesión.";
-                } else if (err.code === 'auth/popup-blocked') {
-                    this.authError = "Tu navegador bloqueó la ventana emergente. Permite pop-ups e intenta de nuevo.";
-                } else {
-                    this.authError = "No se pudo iniciar con Google: " + err.message;
-                }
+                this.authError = "No se pudo iniciar con Google.";
             }
         },
 
@@ -420,16 +262,61 @@ window.app = function() {
         toggleAuthMode() {
             this.authMode = this.authMode === 'login' ? 'register' : 'login';
             this.authError = null;
-            this.codeSent = false;
-            this.verificationCode = '';
         },
 
-        switchAuthMethod(method) {
-            this.authMethod = method;
-            this.authError = null;
-            this.codeSent = false;
-            this.verificationCode = '';
+        // --- SELLER LOGIC ---
+        // (Copied from your previous code, logic remains the same)
+        get canSubmitSellerForm() {
+            const hasType = this.sellerForm.type !== '';
+            const hasVolume = this.sellerForm.volume !== '';
+            const hasCity = this.sellerForm.city.trim().length >= 2;
+            const hasBusinessName = this.sellerForm.type === 'dealer' ? this.sellerForm.businessName.trim().length >= 2 : true;
+            // Phone is optional if not already on file, but recommended
+            const hasPhone = this.userProfile?.phone || this.sellerForm.phone.trim().length >= 10;
+            return hasType && hasVolume && hasPhone && hasCity && hasBusinessName;
         },
+        
+        get needsPhoneForSeller() { return !this.userProfile?.phone; },
+        
+        resetSellerForm() {
+            this.sellerForm = { type: '', businessName: '', volume: '', phone: '', city: '' };
+        },
+
+        async submitSellerRequest() {
+            if (!this.user || !this.canSubmitSellerForm) return;
+            this.sellerFormLoading = true;
+            const phoneNumber = this.userProfile?.phone || this.sellerForm.phone.trim();
+            
+            try {
+                await setDoc(doc(db, "users", this.user.uid), {
+                    ...this.userProfile,
+                    phone: phoneNumber, 
+                    sellerStatus: 'pending',
+                    sellerRequest: {
+                        type: this.sellerForm.type,
+                        businessName: this.sellerForm.businessName || null,
+                        volume: this.sellerForm.volume,
+                        phone: phoneNumber,
+                        city: this.sellerForm.city.trim(),
+                        requestedAt: new Date()
+                    },
+                    updatedAt: new Date()
+                }, { merge: true });
+                
+                this.userProfile.sellerStatus = 'pending';
+                this.userProfile.phone = phoneNumber;
+                this.sellerModalOpen = false;
+                this.resetSellerForm();
+                alert('¡Solicitud enviada! Te contactaremos pronto.');
+            } catch (err) {
+                console.error("Error submitting seller request:", err);
+                alert('Error al enviar solicitud.');
+            } finally {
+                this.sellerFormLoading = false;
+            }
+        },
+
+        async requestSellerAccess() { this.sellerModalOpen = true; },
 
         // --- FETCH CARS ---
         async fetchCars() {
@@ -458,55 +345,8 @@ window.app = function() {
                         date: date
                     };
                 });
-            } catch (err) {
-                console.error(err);
-            } finally {
-                this.loading = false;
-            }
-        },
-
-        // Form Validation Logic
-        get canSubmit() {
-            if (this.authMethod === 'phone') {
-                if (this.codeSent) {
-                    // Verifying code
-                    return this.verificationCode.length >= 6;
-                } else {
-                    // Sending code - need phone and name for registration
-                    const validPhone = this.phone.trim().length >= 10;
-                    if (this.authMode === 'register') {
-                        return validPhone && this.displayName.trim().length >= 2;
-                    }
-                    return validPhone;
-                }
-            } else {
-                // Email auth
-                const validEmail = this.email.includes('@') && this.email.includes('.');
-                const validPass = this.password.length >= 8;
-                
-                if (this.authMode === 'register') {
-                    return validEmail && validPass && this.displayName.trim().length >= 2;
-                }
-                return validEmail && validPass;
-            }
-        },
-
-        // Seller status helpers
-        get isApprovedSeller() {
-            return this.userProfile?.sellerStatus === 'approved';
-        },
-        
-        get isPendingSeller() {
-            return this.userProfile?.sellerStatus === 'pending';
-        },
-
-        get sellerStatusText() {
-            switch(this.userProfile?.sellerStatus) {
-                case 'approved': return 'Vendedor Verificado ✓';
-                case 'pending': return 'Solicitud en Revisión...';
-                case 'rejected': return 'Solicitud Rechazada';
-                default: return 'Usuario';
-            }
+            } catch (err) { console.error(err); } 
+            finally { this.loading = false; }
         },
 
         // --- CORE LOGIC (Filter/Sort/Actions) ---
@@ -553,7 +393,26 @@ window.app = function() {
             localStorage.setItem('apson_favorites', JSON.stringify(this.favorites));
         },
 
-        // Nav Actions
+        // Nav/Utils
+        get canSubmit() {
+            const validEmail = this.email.includes('@') && this.email.includes('.');
+            const validPass = this.password.length >= 8;
+            if (this.authMode === 'register') return validEmail && validPass && this.displayName.trim().length >= 2;
+            return validEmail && validPass;
+        },
+        
+        // Seller status helpers
+        get isApprovedSeller() { return this.userProfile?.sellerStatus === 'approved'; },
+        get isPendingSeller() { return this.userProfile?.sellerStatus === 'pending'; },
+        get sellerStatusText() {
+            switch(this.userProfile?.sellerStatus) {
+                case 'approved': return 'Vendedor Verificado ✓';
+                case 'pending': return 'Solicitud en Revisión...';
+                case 'rejected': return 'Solicitud Rechazada';
+                default: return 'Usuario';
+            }
+        },
+
         openSort() { this.sortOpen = true; document.body.style.overflow = 'hidden'; },
         closeSort() { this.sortOpen = false; document.body.style.overflow = 'auto'; },
         applySort(val) { this.sortBy = val; this.closeSort(); window.scrollTo({top:0, behavior:'smooth'}); },
@@ -564,32 +423,24 @@ window.app = function() {
         closeSearch() { this.searchOpen = false; },
         openCar(car) { this.selectedCar = car; document.body.style.overflow = 'hidden'; },
         closeCar() { this.selectedCar = null; document.body.style.overflow = 'auto'; },
-
-        // Gatekeepers
         enterApp(action) {
             if (action === 'vender') this.startSelling();
             else if (action === 'cambiar') window.location.href = 'https://wa.me/526333331107?text=Quiero cambiar mi auto';
             else { this.introOpen = false; window.scrollTo({top:0, behavior:'smooth'}); }
         },
-        
         startSelling() {
             if (!this.isLoggedIn) {
-                // Not logged in - go to profile to login/register
                 localStorage.setItem('pending_sell_action', 'true'); 
                 this.introOpen = false;
                 this.currentView = 'profile';
                 window.scrollTo({top:0, behavior:'smooth'});
             } else if (this.isApprovedSeller) {
-                // Approved seller - go to sell page
                 window.location.href = 'sell.html';
             } else {
-                // Logged in but not approved seller - show modal
                 this.introOpen = false;
                 this.sellerModalOpen = true;
             }
         },
-
-        // Utils
         formatMoney(amount) { return new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN', maximumFractionDigits: 0 }).format(amount); },
         timeAgo(date) {
             const seconds = Math.floor((new Date() - date) / 1000);

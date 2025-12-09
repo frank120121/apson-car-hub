@@ -84,7 +84,7 @@
     </div>
 
     <!-- HEADER -->
-    <header class="fixed top-0 w-full z-40 bg-white border-b border-gray-200 transition-transform duration-300 ease-in-out"
+    <header class="fixed top-0 w-full z-40 bg-white/90 backdrop-blur-md border-b border-gray-200 transition-transform duration-300 ease-in-out"
             :class="visible ? 'translate-y-0' : '-translate-y-full'"
             x-data="{ 
                 visible: true, 
@@ -295,106 +295,67 @@
         <!-- PROFILE VIEW -->
         <div x-show="currentView === 'profile'" class="min-h-[70vh] flex flex-col items-center justify-center p-6 animate-fade-in">
             
-            <!-- NOT LOGGED IN -->
             <template x-if="!isLoggedIn">
                 <div class="w-full max-w-sm text-center">
-                    <div class="mb-6 relative"><div class="w-20 h-20 bg-blue-100 rounded-full mx-auto flex items-center justify-center"><span class="text-4xl">👋</span></div></div>
-                    <h2 class="text-2xl font-extrabold text-gray-900 mb-2">Bienvenido a NexCar</h2>
-                    <p class="text-gray-500 mb-6">Inicia sesión para guardar favoritos, vender tu auto y más.</p>
                     
-                    <!-- Auth Method Toggle -->
-                    <div class="flex bg-gray-100 rounded-xl p-1 mb-6">
-                        <button @click="switchAuthMethod('phone')" 
-                                class="flex-1 py-2 text-sm font-bold rounded-lg transition-all"
-                                :class="authMethod === 'phone' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500'">
-                            📱 Teléfono
-                        </button>
-                        <button @click="switchAuthMethod('email')" 
-                                class="flex-1 py-2 text-sm font-bold rounded-lg transition-all"
-                                :class="authMethod === 'email' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500'">
-                            ✉️ Correo
-                        </button>
+                    <div class="flex justify-center mb-6">
+                        <div class="bg-gray-100 p-1 rounded-full inline-flex relative cursor-pointer" 
+                             @click="signupIntent = (signupIntent === 'buy' ? 'sell' : 'buy')">
+                            
+                            <div class="absolute top-1 bottom-1 w-[calc(50%-4px)] bg-white rounded-full shadow-sm transition-all duration-300 ease-out"
+                                 :class="signupIntent === 'buy' ? 'left-1' : 'left-[calc(50%)]'"></div>
+
+                            <div class="relative z-10 px-6 py-1.5 text-xs font-bold uppercase tracking-wide transition-colors duration-300"
+                                 :class="signupIntent === 'buy' ? 'text-blue-600' : 'text-gray-400'">
+                                Comprar
+                            </div>
+                            <div class="relative z-10 px-6 py-1.5 text-xs font-bold uppercase tracking-wide transition-colors duration-300"
+                                 :class="signupIntent === 'sell' ? 'text-purple-600' : 'text-gray-400'">
+                                Vender
+                            </div>
+                        </div>
                     </div>
 
+                    <h2 class="text-2xl font-extrabold text-gray-900 mb-2">Bienvenido a NexCar</h2>
+                    <p class="text-gray-500 mb-6" x-text="signupIntent === 'buy' ? 'Encuentra tu próximo auto hoy.' : 'Publica tu auto y recibe ofertas.'"></p>
+
                     <div class="space-y-3 mb-6 text-left">
-                        
                         <div x-show="authError" class="bg-red-50 text-red-500 text-xs p-3 rounded-lg mb-2 border border-red-100" x-text="authError"></div>
 
-                        <!-- NAME FIELD (only for registration) -->
-                        <div x-show="authMode === 'register' && !codeSent" x-transition>
+                        <div x-show="authMode === 'register'" x-transition>
                             <label class="block text-xs font-bold text-gray-500 uppercase mb-1 ml-1">Tu Nombre</label>
                             <input type="text" x-model="displayName" placeholder="Juan Pérez" class="w-full p-4 bg-gray-100 rounded-xl border-transparent focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition-all">
                         </div>
 
-                        <!-- PHONE AUTH -->
-                        <template x-if="authMethod === 'phone'">
-                            <div>
-                                <!-- Phone Number Input -->
-                                <div x-show="!codeSent">
-                                    <label class="block text-xs font-bold text-gray-500 uppercase mb-1 ml-1">WhatsApp / Teléfono</label>
-                                    <div class="flex">
-                                        <span class="inline-flex items-center px-3 bg-gray-200 text-gray-600 rounded-l-xl border-r border-gray-300 text-sm font-medium">
-                                            🇲🇽 +52
-                                        </span>
-                                        <input type="tel" x-model="phone" placeholder="633 123 4567" 
-                                               class="flex-1 p-4 bg-gray-100 rounded-r-xl border-transparent focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition-all">
-                                    </div>
-                                    <p class="text-[10px] mt-1 ml-1 text-gray-400">Te enviaremos un código por SMS</p>
-                                </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-500 uppercase mb-1 ml-1">Correo</label>
+                            <input type="email" x-model="email" placeholder="hola@ejemplo.com" class="w-full p-4 bg-gray-100 rounded-xl border-transparent focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition-all">
+                        </div>
 
-                                <!-- Verification Code Input -->
-                                <div x-show="codeSent" x-transition>
-                                    <label class="block text-xs font-bold text-gray-500 uppercase mb-1 ml-1">Código de Verificación</label>
-                                    <input type="text" x-model="verificationCode" placeholder="123456" maxlength="6"
-                                           class="w-full p-4 bg-gray-100 rounded-xl border-transparent focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition-all text-center text-2xl tracking-widest font-mono">
-                                    <p class="text-[10px] mt-1 ml-1 text-gray-400">
-                                        Enviado a +52 <span x-text="phone"></span> · 
-                                        <button @click="resendCode()" class="text-blue-600 font-bold">Reenviar</button>
-                                    </p>
-                                </div>
-                            </div>
-                        </template>
-
-                        <!-- EMAIL AUTH -->
-                        <template x-if="authMethod === 'email'">
-                            <div class="space-y-3">
-                                <div>
-                                    <label class="block text-xs font-bold text-gray-500 uppercase mb-1 ml-1">Correo</label>
-                                    <input type="email" x-model="email" placeholder="hola@ejemplo.com" class="w-full p-4 bg-gray-100 rounded-xl border-transparent focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition-all">
-                                </div>
-                                <div>
-                                    <label class="block text-xs font-bold text-gray-500 uppercase mb-1 ml-1">Contraseña</label>
-                                    <input type="password" x-model="password" placeholder="••••••••" class="w-full p-4 bg-gray-100 rounded-xl border-transparent focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition-all">
-                                    <p class="text-[10px] mt-1 ml-1 transition-colors" 
-                                    :class="password.length >= 8 ? 'text-green-500 font-bold' : 'text-gray-400'">
-                                    Mínimo 8 caracteres <span x-show="password.length >= 8">✓</span>
-                                    </p>
-                                </div>
-                            </div>
-                        </template>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-500 uppercase mb-1 ml-1">Contraseña</label>
+                            <input type="password" x-model="password" placeholder="••••••••" class="w-full p-4 bg-gray-100 rounded-xl border-transparent focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition-all">
+                            
+                            <p x-show="authMode === 'register'" class="text-[10px] mt-1 ml-1 transition-colors" 
+                               :class="password.length >= 8 ? 'text-green-500 font-bold' : 'text-gray-400'">
+                                Mínimo 8 caracteres <span x-show="password.length >= 8">✓</span>
+                            </p>
+                        </div>
                     </div>
-
-                    <!-- Recaptcha container (invisible) -->
-                    <div id="recaptcha-container"></div>
 
                     <button @click="submitAuth()" 
                             :disabled="!canSubmit || loading"
                             class="w-full py-4 font-bold rounded-xl transition-all mb-4"
                             :class="canSubmit && !loading ? 'bg-blue-600 text-white shadow-lg shadow-blue-200 active:scale-95 cursor-pointer' : 'bg-gray-200 text-gray-400 cursor-not-allowed'">
                         <span x-show="!loading">
-                            <template x-if="authMethod === 'phone'">
-                                <span x-text="codeSent ? 'Verificar Código' : 'Enviar Código'"></span>
-                            </template>
-                            <template x-if="authMethod === 'email'">
-                                <span x-text="authMode === 'login' ? 'Iniciar Sesión' : 'Crear Cuenta'"></span>
-                            </template>
+                            <span x-text="authMode === 'login' ? 'Iniciar Sesión' : 'Crear Cuenta'"></span>
                         </span>
                         <span x-show="loading" class="flex items-center justify-center gap-2">
                             <svg class="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
                                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
                             </svg>
-                            <span x-text="codeSent ? 'Verificando...' : 'Enviando...'"></span>
+                            <span>Procesando...</span>
                         </span>
                     </button>
 
@@ -403,7 +364,7 @@
                         Continuar con Google
                     </button>
 
-                    <p class="mt-6 text-sm text-gray-400" x-show="authMethod === 'email'">
+                    <p class="mt-6 text-sm text-gray-400">
                         <span x-text="authMode === 'login' ? '¿No tienes cuenta?' : '¿Ya tienes cuenta?'"></span>
                         <button @click="toggleAuthMode()" class="text-blue-600 font-bold ml-1">
                             <span x-text="authMode === 'login' ? 'Regístrate' : 'Inicia Sesión'"></span>
@@ -412,7 +373,6 @@
                 </div>
             </template>
 
-            <!-- LOGGED IN -->
             <template x-if="isLoggedIn">
                 <div class="w-full max-w-sm text-center">
                     <div class="mb-8">
@@ -429,7 +389,6 @@
                         <h2 class="text-2xl font-extrabold text-gray-900" x-text="user?.name || 'Usuario'"></h2>
                         <p class="text-gray-400 text-sm" x-text="user?.email"></p>
                         
-                        <!-- Seller Status Badge -->
                         <div class="mt-3">
                             <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold"
                                   :class="{
@@ -447,7 +406,6 @@
                     </div>
                     
                     <div class="grid gap-3 mb-8">
-                        <!-- Approved Seller - can sell -->
                         <template x-if="isApprovedSeller">
                             <a href="sell.html" class="flex items-center gap-4 p-4 bg-white border border-gray-100 rounded-2xl shadow-sm active:scale-95 transition-transform">
                                 <div class="w-10 h-10 bg-green-100 text-green-600 rounded-full flex items-center justify-center">
@@ -461,7 +419,6 @@
                             </a>
                         </template>
                         
-                        <!-- Pending Seller -->
                         <template x-if="isPendingSeller">
                             <div class="flex items-center gap-4 p-4 bg-yellow-50 border border-yellow-200 rounded-2xl">
                                 <div class="w-10 h-10 bg-yellow-100 text-yellow-600 rounded-full flex items-center justify-center">
@@ -474,7 +431,6 @@
                             </div>
                         </template>
                         
-                        <!-- Not a seller - request access -->
                         <template x-if="!isApprovedSeller && !isPendingSeller">
                             <button @click="sellerModalOpen = true" class="flex items-center gap-4 p-4 bg-white border border-gray-100 rounded-2xl shadow-sm active:scale-95 transition-transform">
                                 <div class="w-10 h-10 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center">
