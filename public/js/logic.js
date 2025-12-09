@@ -6,7 +6,7 @@ import { collection, getDocs, query, orderBy, limit } from "https://www.gstatic.
 import { 
     signInWithEmailAndPassword, 
     createUserWithEmailAndPassword, 
-    signInWithRedirect,
+    signInWithPopup,
     getRedirectResult,  
     GoogleAuthProvider,
     signOut,
@@ -151,10 +151,13 @@ window.app = function() {
         async loginGoogle() {
             const provider = new GoogleAuthProvider();
             try {
-                // Changed from Popup to Redirect
-                await signInWithRedirect(auth, provider);
+                // CHANGE: Use Popup instead of Redirect for better localhost support
+                await signInWithPopup(auth, provider);
+                
+                // Success! The onAuthStateChanged listener will handle the state update automatically.
+                
             } catch (err) {
-                console.error(err);
+                console.error("Google Login Error:", err);
                 this.authError = "No se pudo iniciar con Google.";
             }
         },
