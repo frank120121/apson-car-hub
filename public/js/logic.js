@@ -2,11 +2,12 @@
 
 // 1. IMPORTS
 import { db, auth } from './config.js';
-import { collection, getDocs, query, orderBy, limit } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+import { collection, getDocs, query, orderBy, limit, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 import { 
     signInWithEmailAndPassword, 
     createUserWithEmailAndPassword, 
     signInWithPopup,
+    updateProfile,
     GoogleAuthProvider,
     signOut,
     onAuthStateChanged
@@ -57,10 +58,11 @@ window.app = function() {
         error: null,
         
         // --- MODAL STATES ---
-        searchOpen: false,  // Top Search Bar (Typewriter)
-        sortOpen: false,    // Bottom Sheet Sort
-        filterOpen: false,  // Sidebar Filter Modal
-        introOpen: true,    // Splash Screen
+        searchOpen: false,
+        sortOpen: false,
+        filterOpen: false,
+        introOpen: true,
+        sellerModalOpen: false,
 
         // --- FILTERS ---
         search: '',
@@ -74,38 +76,157 @@ window.app = function() {
         // --- AUTH STATE ---
         isLoggedIn: false,
         user: null,
+        userProfile: null,
         authMode: 'login',
         email: '',
         password: '',
+        displayName: '',
         authError: null,
+
+        // --- SELLER FORM STATE ---
+        sellerForm: {
+            type: '',           // 'independent' or 'dealer'
+            businessName: '',   // only for dealers
+            volume: '',         // '1-3', '4-10', '10+'
+            phone: '',
+            city: ''
+        },
+        sellerFormLoading: false,
 
         // --- LIFECYCLE ---
         async init() {
             const saved = localStorage.getItem('apson_favorites');
             if (saved) this.favorites = JSON.parse(saved);
 
-            onAuthStateChanged(auth, (user) => {
+            onAuthStateChanged(auth, async (user) => {
                 if (user) {
                     this.isLoggedIn = true;
+                    
+                    // Fetch user profile from Firestore
+                    await this.fetchUserProfile(user.uid);
+                    
                     this.user = { 
-                        name: user.displayName || user.email.split('@')[0], 
+                        uid: user.uid,
+                        name: user.displayName || this.userProfile?.name || user.email.split('@')[0], 
                         email: user.email, 
-                        photo: user.photoURL 
+                        photo: user.photoURL || this.userProfile?.photo || null
                     };
                     
                     if (localStorage.getItem('pending_sell_action')) {
                         localStorage.removeItem('pending_sell_action');
-                        setTimeout(() => { window.location.href = 'sell.html'; }, 500);
+                        // Check if user is approved seller before redirecting
+                        if (this.userProfile?.sellerStatus === 'approved') {
+                            setTimeout(() => { window.location.href = 'sell.html'; }, 500);
+                        } else {
+                            // Show seller request modal or message
+                            setTimeout(() => { this.sellerModalOpen = true; }, 500);
+                        }
                     }
                 } else {
                     this.isLoggedIn = false;
                     this.user = null;
+                    this.userProfile = null;
                 }
             });
 
             await this.fetchCars();
         },
 
+        // --- USER PROFILE ---
+        async fetchUserProfile(uid) {
+            try {
+                const userDoc = await getDoc(doc(db, "users", uid));
+                if (userDoc.exists()) {
+                    this.userProfile = userDoc.data();
+                } else {
+                    this.userProfile = null;
+                }
+            } catch (err) {
+                console.error("Error fetching user profile:", err);
+                this.userProfile = null;
+            }
+        },
+
+        async createUserProfile(uid, data) {
+            try {
+                await setDoc(doc(db, "users", uid), {
+                    name: data.name,
+                    email: data.email,
+                    photo: data.photo || null,
+                    sellerStatus: 'none', // none, pending, approved, rejected
+                    createdAt: new Date(),
+                    updatedAt: new Date()
+                });
+                this.userProfile = {
+                    name: data.name,
+                    email: data.email,
+                    sellerStatus: 'none'
+                };
+            } catch (err) {
+                console.error("Error creating user profile:", err);
+            }
+        },
+
+        async requestSellerAccess() {
+            // Legacy method - now using submitSellerRequest
+            this.sellerModalOpen = true;
+        },
+
+        // Seller form validation
+        get canSubmitSellerForm() {
+            const hasType = this.sellerForm.type !== '';
+            const hasVolume = this.sellerForm.volume !== '';
+            const hasPhone = this.sellerForm.phone.trim().length >= 7;
+            const hasCity = this.sellerForm.city.trim().length >= 2;
+            const hasBusinessName = this.sellerForm.type === 'dealer' ? this.sellerForm.businessName.trim().length >= 2 : true;
+            
+            return hasType && hasVolume && hasPhone && hasCity && hasBusinessName;
+        },
+
+        resetSellerForm() {
+            this.sellerForm = {
+                type: '',
+                businessName: '',
+                volume: '',
+                phone: '',
+                city: ''
+            };
+        },
+
+        async submitSellerRequest() {
+            if (!this.user || !this.canSubmitSellerForm) return;
+            
+            this.sellerFormLoading = true;
+            
+            try {
+                await setDoc(doc(db, "users", this.user.uid), {
+                    ...this.userProfile,
+                    sellerStatus: 'pending',
+                    sellerRequest: {
+                        type: this.sellerForm.type,
+                        businessName: this.sellerForm.businessName || null,
+                        volume: this.sellerForm.volume,
+                        phone: this.sellerForm.phone.trim(),
+                        city: this.sellerForm.city.trim(),
+                        requestedAt: new Date()
+                    },
+                    updatedAt: new Date()
+                }, { merge: true });
+                
+                this.userProfile.sellerStatus = 'pending';
+                this.sellerModalOpen = false;
+                this.resetSellerForm();
+                
+                // Show success message
+                alert('¡Solicitud enviada! Te contactaremos pronto por WhatsApp.');
+                
+            } catch (err) {
+                console.error("Error submitting seller request:", err);
+                alert('Error al enviar solicitud. Intenta de nuevo.');
+            } finally {
+                this.sellerFormLoading = false;
+            }
+        },
 
         // --- AUTH ACTIONS ---
         async submitAuth() {
@@ -116,15 +237,33 @@ window.app = function() {
                 if (this.authMode === 'login') {
                     await signInWithEmailAndPassword(auth, this.email, this.password);
                 } else {
-                    await createUserWithEmailAndPassword(auth, this.email, this.password);
+                    // Registration - require name
+                    if (!this.displayName.trim()) {
+                        this.authError = "Por favor ingresa tu nombre.";
+                        this.loading = false;
+                        return;
+                    }
+                    
+                    const userCredential = await createUserWithEmailAndPassword(auth, this.email, this.password);
+                    
+                    // Update Firebase Auth profile with display name
+                    await updateProfile(userCredential.user, {
+                        displayName: this.displayName.trim()
+                    });
+                    
+                    // Create user profile in Firestore
+                    await this.createUserProfile(userCredential.user.uid, {
+                        name: this.displayName.trim(),
+                        email: this.email
+                    });
                 }
-                // Success is handled by onAuthStateChanged automatically
             } catch (err) {
                 console.error("Auth Error", err);
                 if (err.code === 'auth/wrong-password') this.authError = "Contraseña incorrecta.";
                 else if (err.code === 'auth/user-not-found') this.authError = "Usuario no encontrado.";
                 else if (err.code === 'auth/email-already-in-use') this.authError = "El correo ya está registrado.";
                 else if (err.code === 'auth/weak-password') this.authError = "La contraseña debe tener 6 caracteres.";
+                else if (err.code === 'auth/invalid-credential') this.authError = "Credenciales inválidas.";
                 else this.authError = "Error al iniciar sesión.";
             } finally {
                 this.loading = false;
@@ -134,14 +273,23 @@ window.app = function() {
         async loginGoogle() {
             const provider = new GoogleAuthProvider();
             try {
-                // Use signInWithPopup instead of signInWithRedirect
-                // This works better on iOS/Safari due to third-party cookie restrictions
                 const result = await signInWithPopup(auth, provider);
-                // Success is handled by onAuthStateChanged automatically
+                
+                // Check if user profile exists, if not create one
+                const userDoc = await getDoc(doc(db, "users", result.user.uid));
+                if (!userDoc.exists()) {
+                    await this.createUserProfile(result.user.uid, {
+                        name: result.user.displayName || result.user.email.split('@')[0],
+                        email: result.user.email,
+                        photo: result.user.photoURL
+                    });
+                } else {
+                    this.userProfile = userDoc.data();
+                }
+                
                 console.log("Google login successful:", result.user.email);
             } catch (err) {
                 console.error("Google Login Error:", err);
-                // Handle popup blocked or closed by user
                 if (err.code === 'auth/popup-closed-by-user') {
                     this.authError = "Cerraste la ventana de inicio de sesión.";
                 } else if (err.code === 'auth/popup-blocked') {
@@ -156,8 +304,10 @@ window.app = function() {
             await signOut(auth);
             this.isLoggedIn = false;
             this.user = null;
+            this.userProfile = null;
             this.email = '';
             this.password = '';
+            this.displayName = '';
         },
 
         toggleAuthMode() {
@@ -201,13 +351,31 @@ window.app = function() {
 
         // Form Validation Logic
         get canSubmit() {
-            // 1. Check if email has "@" and "."
             const validEmail = this.email.includes('@') && this.email.includes('.');
-            
-            // 2. Check if password is at least 6 chars (Firebase Requirement)
             const validPass = this.password.length >= 8;
-
+            
+            if (this.authMode === 'register') {
+                return validEmail && validPass && this.displayName.trim().length >= 2;
+            }
             return validEmail && validPass;
+        },
+
+        // Seller status helpers
+        get isApprovedSeller() {
+            return this.userProfile?.sellerStatus === 'approved';
+        },
+        
+        get isPendingSeller() {
+            return this.userProfile?.sellerStatus === 'pending';
+        },
+
+        get sellerStatusText() {
+            switch(this.userProfile?.sellerStatus) {
+                case 'approved': return 'Vendedor Verificado ✓';
+                case 'pending': return 'Solicitud en Revisión...';
+                case 'rejected': return 'Solicitud Rechazada';
+                default: return 'Usuario';
+            }
         },
 
         // --- CORE LOGIC (Filter/Sort/Actions) ---
@@ -272,16 +440,21 @@ window.app = function() {
             else if (action === 'cambiar') window.location.href = 'https://wa.me/526333331107?text=Quiero cambiar mi auto';
             else { this.introOpen = false; window.scrollTo({top:0, behavior:'smooth'}); }
         },
+        
         startSelling() {
-            if (this.isLoggedIn) {
-                window.location.href = 'sell.html';
-            } else {
-                // Remember user wanted to sell
+            if (!this.isLoggedIn) {
+                // Not logged in - go to profile to login/register
                 localStorage.setItem('pending_sell_action', 'true'); 
-                
                 this.introOpen = false;
                 this.currentView = 'profile';
                 window.scrollTo({top:0, behavior:'smooth'});
+            } else if (this.isApprovedSeller) {
+                // Approved seller - go to sell page
+                window.location.href = 'sell.html';
+            } else {
+                // Logged in but not approved seller - show modal
+                this.introOpen = false;
+                this.sellerModalOpen = true;
             }
         },
 
