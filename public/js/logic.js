@@ -7,6 +7,8 @@ import {
     signInWithEmailAndPassword, 
     createUserWithEmailAndPassword, 
     signInWithPopup,
+    signInWithPhoneNumber,
+    RecaptchaVerifier,
     updateProfile,
     GoogleAuthProvider,
     signOut,
@@ -78,8 +80,13 @@ window.app = function() {
         user: null,
         userProfile: null,
         authMode: 'login',
+        authMethod: 'email',    // 'email' or 'phone'
         email: '',
         password: '',
+        phone: '',
+        verificationCode: '',
+        confirmationResult: null,
+        codeSent: false,
         displayName: '',
         authError: null,
 
@@ -89,7 +96,7 @@ window.app = function() {
             businessName: '',   // only for dealers
             volume: '',         // '1-3', '4-10', '10+'
             phone: '',
-            city: ''
+            city: ''           // only if not on file
         },
         sellerFormLoading: false,
 
@@ -151,7 +158,8 @@ window.app = function() {
             try {
                 await setDoc(doc(db, "users", uid), {
                     name: data.name,
-                    email: data.email,
+                    email: data.email || null,
+                    phone: data.phone || null,
                     photo: data.photo || null,
                     sellerStatus: 'none', // none, pending, approved, rejected
                     createdAt: new Date(),
@@ -159,7 +167,8 @@ window.app = function() {
                 });
                 this.userProfile = {
                     name: data.name,
-                    email: data.email,
+                    email: data.email || null,
+                    phone: data.phone || null,
                     sellerStatus: 'none'
                 };
             } catch (err) {
@@ -176,11 +185,17 @@ window.app = function() {
         get canSubmitSellerForm() {
             const hasType = this.sellerForm.type !== '';
             const hasVolume = this.sellerForm.volume !== '';
-            const hasPhone = this.sellerForm.phone.trim().length >= 7;
             const hasCity = this.sellerForm.city.trim().length >= 2;
             const hasBusinessName = this.sellerForm.type === 'dealer' ? this.sellerForm.businessName.trim().length >= 2 : true;
             
+            // Only require phone if not already on file
+            const hasPhone = this.userProfile?.phone || this.sellerForm.phone.trim().length >= 10;
+            
             return hasType && hasVolume && hasPhone && hasCity && hasBusinessName;
+        },
+
+        get needsPhoneForSeller() {
+            return !this.userProfile?.phone;
         },
 
         resetSellerForm() {
@@ -198,15 +213,19 @@ window.app = function() {
             
             this.sellerFormLoading = true;
             
+            // Use existing phone or new one from form
+            const phoneNumber = this.userProfile?.phone || this.sellerForm.phone.trim();
+            
             try {
                 await setDoc(doc(db, "users", this.user.uid), {
                     ...this.userProfile,
+                    phone: phoneNumber, // Update phone if provided
                     sellerStatus: 'pending',
                     sellerRequest: {
                         type: this.sellerForm.type,
                         businessName: this.sellerForm.businessName || null,
                         volume: this.sellerForm.volume,
-                        phone: this.sellerForm.phone.trim(),
+                        phone: phoneNumber,
                         city: this.sellerForm.city.trim(),
                         requestedAt: new Date()
                     },
@@ -214,6 +233,7 @@ window.app = function() {
                 }, { merge: true });
                 
                 this.userProfile.sellerStatus = 'pending';
+                this.userProfile.phone = phoneNumber;
                 this.sellerModalOpen = false;
                 this.resetSellerForm();
                 
@@ -230,8 +250,17 @@ window.app = function() {
 
         // --- AUTH ACTIONS ---
         async submitAuth() {
-            this.loading = true;
             this.authError = null;
+            
+            if (this.authMethod === 'phone') {
+                await this.submitPhoneAuth();
+            } else {
+                await this.submitEmailAuth();
+            }
+        },
+
+        async submitEmailAuth() {
+            this.loading = true;
             
             try {
                 if (this.authMode === 'login') {
@@ -254,7 +283,8 @@ window.app = function() {
                     // Create user profile in Firestore
                     await this.createUserProfile(userCredential.user.uid, {
                         name: this.displayName.trim(),
-                        email: this.email
+                        email: this.email,
+                        phone: null
                     });
                 }
             } catch (err) {
@@ -268,6 +298,83 @@ window.app = function() {
             } finally {
                 this.loading = false;
             }
+        },
+
+        async setupRecaptcha() {
+            if (!window.recaptchaVerifier) {
+                window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
+                    'size': 'invisible',
+                    'callback': (response) => {
+                        // reCAPTCHA solved
+                    }
+                });
+            }
+        },
+
+        async submitPhoneAuth() {
+            this.loading = true;
+            
+            try {
+                if (!this.codeSent) {
+                    // Step 1: Send verification code
+                    await this.setupRecaptcha();
+                    
+                    // Format phone number (add Mexico code if needed)
+                    let phoneNumber = this.phone.trim().replace(/\s/g, '');
+                    if (!phoneNumber.startsWith('+')) {
+                        phoneNumber = '+52' + phoneNumber.replace(/^52/, '');
+                    }
+                    
+                    const confirmationResult = await signInWithPhoneNumber(auth, phoneNumber, window.recaptchaVerifier);
+                    this.confirmationResult = confirmationResult;
+                    this.codeSent = true;
+                    this.authError = null;
+                } else {
+                    // Step 2: Verify code
+                    const result = await this.confirmationResult.confirm(this.verificationCode);
+                    
+                    // Check if user profile exists
+                    const userDoc = await getDoc(doc(db, "users", result.user.uid));
+                    if (!userDoc.exists()) {
+                        // New user - create profile
+                        const name = this.displayName.trim() || 'Usuario';
+                        await this.createUserProfile(result.user.uid, {
+                            name: name,
+                            email: null,
+                            phone: this.phone.trim()
+                        });
+                        
+                        if (this.displayName.trim()) {
+                            await updateProfile(result.user, { displayName: name });
+                        }
+                    }
+                    
+                    // Reset phone auth state
+                    this.codeSent = false;
+                    this.verificationCode = '';
+                    this.confirmationResult = null;
+                }
+            } catch (err) {
+                console.error("Phone Auth Error", err);
+                if (err.code === 'auth/invalid-phone-number') this.authError = "Número de teléfono inválido.";
+                else if (err.code === 'auth/invalid-verification-code') this.authError = "Código incorrecto. Intenta de nuevo.";
+                else if (err.code === 'auth/too-many-requests') this.authError = "Demasiados intentos. Espera unos minutos.";
+                else if (err.code === 'auth/code-expired') {
+                    this.authError = "El código expiró. Solicita uno nuevo.";
+                    this.codeSent = false;
+                }
+                else this.authError = "Error: " + err.message;
+            } finally {
+                this.loading = false;
+            }
+        },
+
+        resendCode() {
+            this.codeSent = false;
+            this.verificationCode = '';
+            this.confirmationResult = null;
+            window.recaptchaVerifier = null;
+            this.submitAuth();
         },
 
         async loginGoogle() {
@@ -313,6 +420,15 @@ window.app = function() {
         toggleAuthMode() {
             this.authMode = this.authMode === 'login' ? 'register' : 'login';
             this.authError = null;
+            this.codeSent = false;
+            this.verificationCode = '';
+        },
+
+        switchAuthMethod(method) {
+            this.authMethod = method;
+            this.authError = null;
+            this.codeSent = false;
+            this.verificationCode = '';
         },
 
         // --- FETCH CARS ---
@@ -351,13 +467,28 @@ window.app = function() {
 
         // Form Validation Logic
         get canSubmit() {
-            const validEmail = this.email.includes('@') && this.email.includes('.');
-            const validPass = this.password.length >= 8;
-            
-            if (this.authMode === 'register') {
-                return validEmail && validPass && this.displayName.trim().length >= 2;
+            if (this.authMethod === 'phone') {
+                if (this.codeSent) {
+                    // Verifying code
+                    return this.verificationCode.length >= 6;
+                } else {
+                    // Sending code - need phone and name for registration
+                    const validPhone = this.phone.trim().length >= 10;
+                    if (this.authMode === 'register') {
+                        return validPhone && this.displayName.trim().length >= 2;
+                    }
+                    return validPhone;
+                }
+            } else {
+                // Email auth
+                const validEmail = this.email.includes('@') && this.email.includes('.');
+                const validPass = this.password.length >= 8;
+                
+                if (this.authMode === 'register') {
+                    return validEmail && validPass && this.displayName.trim().length >= 2;
+                }
+                return validEmail && validPass;
             }
-            return validEmail && validPass;
         },
 
         // Seller status helpers
