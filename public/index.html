@@ -98,8 +98,8 @@
 
             <div class="grid grid-cols-1 gap-4 w-full">
                 <button @click="enterApp('comprar')" 
-                        class="group relative w-full py-5 liquid-glass text-blue-600 font-bold rounded-2xl active:scale-95 transition-all overflow-hidden tracking-wide text-lg shadow-lg">
-                    <div class="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/40 to-transparent -translate-x-full group-hover:animate-shimmer"></div>
+                        class="group relative w-full py-5 bg-gradient-to-r from-blue-600/90 to-blue-700/90 backdrop-blur-md text-white font-bold rounded-2xl active:scale-95 transition-all overflow-hidden tracking-wide text-lg shadow-xl border border-white/30">
+                    <div class="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/30 to-transparent -translate-x-full group-hover:animate-shimmer"></div>
                     <span class="relative z-10 drop-shadow-sm">Comprar</span>
                 </button>
                 
@@ -633,22 +633,22 @@
             <div class="relative group mb-8">
                 <span class="absolute left-4 top-4 text-gray-500"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg></span>
                 <input x-ref="searchInput" id="mobileSearchInput" type="text" x-model="search" placeholder="Busca por marca..." 
-                       class="w-full bg-white/20 text-gray-900 rounded-3xl py-4 pl-12 pr-4 text-lg font-medium border border-white/10 focus:bg-white/40 focus:ring-0 focus:outline-none transition-all placeholder-gray-600/60 backdrop-blur-md shadow-inner" 
+                       class="w-full bg-white/20 text-gray-900 rounded-3xl py-4 pl-12 pr-4 text-lg font-medium border border-white/10 focus:bg-white/40 focus:ring-0 focus:outline-none transition-all placeholder-gray-600 backdrop-blur-md shadow-inner" 
                        @keyup.enter="closeSearch()">
             </div>
 
             <div class="grid grid-cols-2 gap-3">
-                <button @click="search = 'Trokas'; closeSearch()" class="p-4 bg-white/10 rounded-2xl border border-white/20 flex items-center gap-3 hover:bg-white/20 active:scale-95 transition-all shadow-sm backdrop-blur-md">
-                    <span class="text-2xl">🛻</span><span class="font-bold text-gray-700">Trokas</span>
+                <button @click="search = 'Trokas'; closeSearch()" class="p-4 bg-white/20 rounded-2xl border border-white/30 flex items-center gap-3 hover:bg-white/30 active:scale-95 transition-all shadow-sm backdrop-blur-md">
+                    <span class="text-2xl">🛻</span><span class="font-extrabold text-gray-900">Trokas</span>
                 </button>
-                <button @click="search = 'Nacional'; closeSearch()" class="p-4 bg-white/10 rounded-2xl border border-white/20 flex items-center gap-3 hover:bg-white/20 active:scale-95 transition-all shadow-sm backdrop-blur-md">
-                    <span class="text-2xl">🇲🇽</span><span class="font-bold text-gray-700">Nacional</span>
+                <button @click="search = 'Nacional'; closeSearch()" class="p-4 bg-white/20 rounded-2xl border border-white/30 flex items-center gap-3 hover:bg-white/30 active:scale-95 transition-all shadow-sm backdrop-blur-md">
+                    <span class="text-2xl">🇲🇽</span><span class="font-extrabold text-gray-900">Nacional</span>
                 </button>
-                <button @click="search = 'Economico'; closeSearch()" class="p-4 bg-white/10 rounded-2xl border border-white/20 flex items-center gap-3 hover:bg-white/20 active:scale-95 transition-all shadow-sm backdrop-blur-md">
-                    <span class="text-2xl">⛽</span><span class="font-bold text-gray-700">Económico</span>
+                <button @click="search = 'Economico'; closeSearch()" class="p-4 bg-white/20 rounded-2xl border border-white/30 flex items-center gap-3 hover:bg-white/30 active:scale-95 transition-all shadow-sm backdrop-blur-md">
+                    <span class="text-2xl">⛽</span><span class="font-extrabold text-gray-900">Económico</span>
                 </button>
-                <button @click="search = '4x4'; closeSearch()" class="p-4 bg-white/10 rounded-2xl border border-white/20 flex items-center gap-3 hover:bg-white/20 active:scale-95 transition-all shadow-sm backdrop-blur-md">
-                    <span class="text-2xl">⛰️</span><span class="font-bold text-gray-700">4x4</span>
+                <button @click="search = '4x4'; closeSearch()" class="p-4 bg-white/20 rounded-2xl border border-white/30 flex items-center gap-3 hover:bg-white/30 active:scale-95 transition-all shadow-sm backdrop-blur-md">
+                    <span class="text-2xl">⛰️</span><span class="font-extrabold text-gray-900">4x4</span>
                 </button>
             </div>
         </div>
@@ -670,44 +670,44 @@
             <div class="flex-1 flex overflow-hidden">
                 <div class="w-1/3 bg-white/5 backdrop-blur-md border-r border-white/10 overflow-y-auto">
                     <template x-for="tab in [{id:'price', name:'Precio'}, {id:'brand', name:'Marca'}, {id:'year', name:'Año'}]">
-                        <button @click="activeFilterTab = tab.id" class="w-full text-left px-4 py-6 text-sm font-bold border-l-4 transition-all" :class="activeFilterTab === tab.id ? 'bg-white/20 border-blue-600 text-blue-700 shadow-inner' : 'border-transparent text-gray-500 hover:text-gray-800'"><span x-text="tab.name"></span></button>
+                        <button @click="activeFilterTab = tab.id" class="w-full text-left px-4 py-6 text-sm font-bold border-l-4 transition-all" :class="activeFilterTab === tab.id ? 'bg-white/40 border-blue-600 text-blue-700 shadow-inner' : 'border-transparent text-gray-500 hover:text-gray-800'"><span x-text="tab.name"></span></button>
                     </template>
                 </div>
                 <div class="w-2/3 p-6 overflow-y-auto bg-white/10 backdrop-blur-sm">
                     <div x-show="activeFilterTab === 'price'">
-                        <h3 class="text-lg font-bold text-gray-900 mb-6 drop-shadow-sm">Rango de Precio</h3>
+                        <h3 class="text-lg font-black text-gray-900 mb-6 drop-shadow-sm">Rango de Precio</h3>
                         <div class="space-y-4">
                             <div class="bg-white/40 rounded-2xl px-4 py-3 shadow-inner border border-white/20 focus-within:ring-2 focus-within:ring-blue-500/50 transition-all backdrop-blur-md">
-                                <label class="text-[10px] text-gray-500 block font-bold uppercase tracking-wide">Desde</label>
-                                <div class="flex items-center"><span class="text-gray-500 mr-1">$</span><input type="number" x-model="minPrice" class="w-full outline-none font-bold text-gray-900 bg-transparent placeholder-gray-400" placeholder="0"></div>
+                                <label class="text-[10px] text-gray-600 block font-bold uppercase tracking-wide">Desde</label>
+                                <div class="flex items-center"><span class="text-gray-600 mr-1">$</span><input type="number" x-model="minPrice" class="w-full outline-none font-bold text-gray-900 bg-transparent placeholder-gray-500" placeholder="0"></div>
                             </div>
                             <div class="bg-white/40 rounded-2xl px-4 py-3 shadow-inner border border-white/20 focus-within:ring-2 focus-within:ring-blue-500/50 transition-all backdrop-blur-md">
-                                <label class="text-[10px] text-gray-500 block font-bold uppercase tracking-wide">Hasta</label>
-                                <div class="flex items-center"><span class="text-gray-500 mr-1">$</span><input type="number" x-model="maxPrice" class="w-full outline-none font-bold text-gray-900 bg-transparent placeholder-gray-400" placeholder="Max"></div>
+                                <label class="text-[10px] text-gray-600 block font-bold uppercase tracking-wide">Hasta</label>
+                                <div class="flex items-center"><span class="text-gray-600 mr-1">$</span><input type="number" x-model="maxPrice" class="w-full outline-none font-bold text-gray-900 bg-transparent placeholder-gray-500" placeholder="Max"></div>
                             </div>
                         </div>
                     </div>
                     <div x-show="activeFilterTab === 'brand'">
-                        <h3 class="text-lg font-bold text-gray-900 mb-4 drop-shadow-sm">Marcas</h3>
+                        <h3 class="text-lg font-black text-gray-900 mb-4 drop-shadow-sm">Marcas</h3>
                         <div class="space-y-3">
                              <template x-for="brand in ['Ford', 'Toyota', 'Nissan', 'Honda', 'Chevrolet', 'Dodge']">
                                 <label class="flex items-center gap-3 p-3 bg-white/40 rounded-xl cursor-pointer hover:bg-white/60 border border-white/30 shadow-sm backdrop-blur-sm transition-all">
                                     <input type="checkbox" :value="brand" x-model="selectedBrands" class="w-5 h-5 text-blue-600 rounded focus:ring-blue-500 bg-white/50 border-gray-300">
-                                    <span class="font-medium text-gray-800" x-text="brand"></span>
+                                    <span class="font-bold text-gray-900" x-text="brand"></span>
                                 </label>
                              </template>
                         </div>
                     </div>
                      <div x-show="activeFilterTab === 'year'">
                         <h3 class="text-lg font-bold text-gray-900 mb-4">Año</h3>
-                        <p class="text-gray-500 text-sm">Próximamente...</p>
+                        <p class="text-gray-600 text-sm">Próximamente...</p>
                     </div>
                 </div>
             </div>
             
             <div class="p-6 border-t border-white/20 flex gap-4 pb-10 bg-white/20 backdrop-blur-xl">
-                <button @click="clearFilters()" class="flex-1 py-4 text-gray-600 font-bold hover:bg-white/30 rounded-2xl transition-colors border border-transparent hover:border-white/20">Limpiar</button>
-                <button @click="applyFilters()" class="flex-[2] py-4 bg-black/80 backdrop-blur-md text-white font-bold rounded-2xl shadow-lg border border-white/20 active:scale-95 transition-all">Ver Resultados</button>
+                <button @click="clearFilters()" class="flex-1 py-4 text-gray-800 font-bold hover:bg-white/30 rounded-2xl transition-colors border border-transparent hover:border-white/20">Limpiar</button>
+                <button @click="applyFilters()" class="flex-[2] py-4 bg-gradient-to-r from-blue-600 to-blue-700 backdrop-blur-md text-white font-bold rounded-2xl shadow-lg border border-white/20 active:scale-95 transition-all">Ver Resultados</button>
             </div>
         </div>
     </div>
