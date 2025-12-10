@@ -34,11 +34,12 @@
                 inset 0 0 0 1px rgba(255, 255, 255, 0.1); /* Inner rim light */
         }
 
-        .liquid-glass-dark {
-            background: rgba(0, 0, 0, 0.4);
-            backdrop-filter: blur(40px) saturate(150%);
-            -webkit-backdrop-filter: blur(40px) saturate(150%);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+        .liquid-glass-frost {
+            background: rgba(255, 255, 255, 0.4); /* Milkier glass for visibility */
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
         }
 
         .liquid-button {
@@ -567,17 +568,17 @@
          x-transition:enter="transition duration-500 ease-out-expo" x-transition:enter-start="opacity-0 translate-x-full" x-transition:enter-end="opacity-100 translate-x-0"
          x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100 translate-x-0" x-transition:leave-end="opacity-0 translate-x-full">
         <div class="w-full h-full bg-white flex flex-col relative">
-            <button @click="closeCar()" class="absolute top-4 left-4 z-20 liquid-glass p-2 rounded-full active:scale-90 transition-transform">
-                <svg class="w-6 h-6 text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+            <button @click="closeCar()" class="absolute top-4 left-4 z-20 liquid-glass-frost text-gray-900 p-2.5 rounded-full active:scale-90 transition-transform shadow-lg">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
             </button>
             <div class="absolute top-4 right-4 z-20 flex gap-3">
                 <template x-if="selectedCar">
-                    <button @click.stop="toggleFavorite(selectedCar.id)" class="liquid-glass p-2 rounded-full active:scale-90 transition-transform" :class="favorites.includes(selectedCar.id) ? 'bg-white text-red-500' : 'text-gray-800'">
+                    <button @click.stop="toggleFavorite(selectedCar.id)" class="liquid-glass-frost p-2.5 rounded-full active:scale-90 transition-transform shadow-lg" :class="favorites.includes(selectedCar.id) ? 'bg-white text-red-500' : 'text-gray-900'">
                         <svg x-show="favorites.includes(selectedCar.id)" class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
                         <svg x-show="!favorites.includes(selectedCar.id)" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path></svg>
                     </button>
                 </template>
-                <button class="liquid-glass p-2 rounded-full active:scale-90 transition-transform"><svg class="w-6 h-6 text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"></path></svg></button>
+                <button class="liquid-glass-frost p-2.5 rounded-full active:scale-90 transition-transform shadow-lg text-gray-900"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"></path></svg></button>
             </div>
             <div class="h-1/2 bg-gray-200 relative">
                 <template x-if="selectedCar"><img :src="selectedCar.image" class="w-full h-full object-cover"></template>
@@ -607,10 +608,13 @@
                     </div>
                 </template>
             </div>
-            <div class="absolute bottom-0 w-full bg-white/80 backdrop-blur-md border-t border-gray-100 p-4 pb-8 flex items-center gap-3 z-50">
-                <a href="tel:+526333331107" class="flex-none w-14 h-14 rounded-full border-2 border-gray-100 flex items-center justify-center text-gray-600 active:bg-gray-50"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path></svg></a>
+            <div class="absolute bottom-0 w-full liquid-glass backdrop-blur-xl border-t border-white/40 p-4 pb-8 flex items-center gap-4 z-50">
+                <a href="tel:+526333331107" class="flex-none w-14 h-14 rounded-full liquid-button flex items-center justify-center text-blue-600 active:scale-95 transition-transform shadow-lg"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path></svg></a>
                 <template x-if="selectedCar">
-                    <a :href="'https://wa.me/526333331107?text=Me interesa el ' + selectedCar.model" class="flex-1 bg-black text-white font-bold h-14 rounded-full flex items-center justify-center gap-2 shadow-lg active:scale-95 transition-transform"><span>Me Interesa</span><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg></a>
+                    <a :href="'https://wa.me/526333331107?text=Me interesa el ' + selectedCar.model" class="flex-1 bg-gradient-to-r from-blue-600/90 to-blue-700/90 backdrop-blur-md text-white font-bold h-14 rounded-full flex items-center justify-center gap-2 shadow-xl border border-white/30 active:scale-95 transition-transform">
+                        <span>Me Interesa</span>
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                    </a>
                 </template>
             </div>
         </div>
@@ -650,53 +654,61 @@
         </div>
     </div>
 
-    <div x-show="filterOpen" style="display: none;" class="fixed inset-0 z-[80] bg-white/80 backdrop-blur-xl flex flex-col"
-         x-transition:enter="transition ease-out duration-300" x-transition:enter-start="translate-y-full" x-transition:enter-end="translate-y-0"
-         x-transition:leave="transition ease-in duration-200" x-transition:leave-start="translate-y-0" x-transition:leave-end="translate-y-full">
-        <div class="flex items-center justify-between px-6 py-6 border-b border-gray-100 shadow-sm bg-white/50 backdrop-blur">
-            <h2 class="text-2xl font-black text-gray-900 tracking-tight">Filtros</h2>
-            <button @click="closeFilter()" class="p-2 bg-gray-100 rounded-full hover:bg-gray-200 text-gray-500">✕</button>
-        </div>
-        <div class="flex-1 flex overflow-hidden">
-            <div class="w-1/3 bg-gray-50/50 backdrop-blur border-r border-gray-200/50 overflow-y-auto">
-                <template x-for="tab in [{id:'price', name:'Precio'}, {id:'brand', name:'Marca'}, {id:'year', name:'Año'}]">
-                    <button @click="activeFilterTab = tab.id" class="w-full text-left px-4 py-6 text-sm font-bold border-l-4 transition-all" :class="activeFilterTab === tab.id ? 'bg-white/80 border-blue-600 text-blue-600 shadow-sm' : 'border-transparent text-gray-400 hover:text-gray-600'"><span x-text="tab.name"></span></button>
-                </template>
+    <div x-show="filterOpen" style="display: none;" class="fixed inset-0 z-[80] bg-black/30 backdrop-blur-sm flex flex-col justify-end"
+         x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
+         x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0">
+         
+        <div class="liquid-glass w-full h-[85vh] rounded-t-[40px] flex flex-col overflow-hidden shadow-2xl border-t border-white/40"
+             x-transition:enter="transition ease-out duration-300" x-transition:enter-start="translate-y-full" x-transition:enter-end="translate-y-0"
+             x-transition:leave="transition ease-in duration-200" x-transition:leave-start="translate-y-0" x-transition:leave-end="translate-y-full">
+             
+            <div class="flex items-center justify-between px-6 py-5 border-b border-white/20 bg-white/10 backdrop-blur-md">
+                <h2 class="text-2xl font-black text-gray-900 tracking-tight drop-shadow-sm">Filtros</h2>
+                <button @click="closeFilter()" class="p-2 bg-white/20 rounded-full hover:bg-white/40 text-gray-600 transition-colors backdrop-blur-sm">✕</button>
             </div>
-            <div class="w-2/3 p-6 overflow-y-auto bg-white/40">
-                <div x-show="activeFilterTab === 'price'">
-                    <h3 class="text-lg font-bold text-gray-900 mb-6">Rango de Precio</h3>
-                    <div class="space-y-4">
-                        <div class="bg-white rounded-xl px-4 py-3 shadow-sm border border-gray-100 focus-within:ring-2 focus-within:ring-blue-500 transition-shadow">
-                            <label class="text-[10px] text-gray-400 block font-bold uppercase tracking-wide">Desde</label>
-                            <div class="flex items-center"><span class="text-gray-400 mr-1">$</span><input type="number" x-model="minPrice" class="w-full outline-none font-bold text-gray-900 bg-transparent" placeholder="0"></div>
-                        </div>
-                        <div class="bg-white rounded-xl px-4 py-3 shadow-sm border border-gray-100 focus-within:ring-2 focus-within:ring-blue-500 transition-shadow">
-                            <label class="text-[10px] text-gray-400 block font-bold uppercase tracking-wide">Hasta</label>
-                            <div class="flex items-center"><span class="text-gray-400 mr-1">$</span><input type="number" x-model="maxPrice" class="w-full outline-none font-bold text-gray-900 bg-transparent" placeholder="Max"></div>
+            
+            <div class="flex-1 flex overflow-hidden">
+                <div class="w-1/3 bg-white/5 backdrop-blur-md border-r border-white/10 overflow-y-auto">
+                    <template x-for="tab in [{id:'price', name:'Precio'}, {id:'brand', name:'Marca'}, {id:'year', name:'Año'}]">
+                        <button @click="activeFilterTab = tab.id" class="w-full text-left px-4 py-6 text-sm font-bold border-l-4 transition-all" :class="activeFilterTab === tab.id ? 'bg-white/20 border-blue-600 text-blue-700 shadow-inner' : 'border-transparent text-gray-500 hover:text-gray-800'"><span x-text="tab.name"></span></button>
+                    </template>
+                </div>
+                <div class="w-2/3 p-6 overflow-y-auto bg-white/10 backdrop-blur-sm">
+                    <div x-show="activeFilterTab === 'price'">
+                        <h3 class="text-lg font-bold text-gray-900 mb-6 drop-shadow-sm">Rango de Precio</h3>
+                        <div class="space-y-4">
+                            <div class="bg-white/40 rounded-2xl px-4 py-3 shadow-inner border border-white/20 focus-within:ring-2 focus-within:ring-blue-500/50 transition-all backdrop-blur-md">
+                                <label class="text-[10px] text-gray-500 block font-bold uppercase tracking-wide">Desde</label>
+                                <div class="flex items-center"><span class="text-gray-500 mr-1">$</span><input type="number" x-model="minPrice" class="w-full outline-none font-bold text-gray-900 bg-transparent placeholder-gray-400" placeholder="0"></div>
+                            </div>
+                            <div class="bg-white/40 rounded-2xl px-4 py-3 shadow-inner border border-white/20 focus-within:ring-2 focus-within:ring-blue-500/50 transition-all backdrop-blur-md">
+                                <label class="text-[10px] text-gray-500 block font-bold uppercase tracking-wide">Hasta</label>
+                                <div class="flex items-center"><span class="text-gray-500 mr-1">$</span><input type="number" x-model="maxPrice" class="w-full outline-none font-bold text-gray-900 bg-transparent placeholder-gray-400" placeholder="Max"></div>
+                            </div>
                         </div>
                     </div>
-                </div>
-                <div x-show="activeFilterTab === 'brand'">
-                    <h3 class="text-lg font-bold text-gray-900 mb-4">Marcas</h3>
-                    <div class="space-y-3">
-                         <template x-for="brand in ['Ford', 'Toyota', 'Nissan', 'Honda', 'Chevrolet', 'Dodge']">
-                            <label class="flex items-center gap-3 p-3 bg-white rounded-xl cursor-pointer hover:bg-gray-50 border border-gray-100 shadow-sm">
-                                <input type="checkbox" :value="brand" x-model="selectedBrands" class="w-5 h-5 text-blue-600 rounded focus:ring-blue-500">
-                                <span class="font-medium text-gray-700" x-text="brand"></span>
-                            </label>
-                         </template>
+                    <div x-show="activeFilterTab === 'brand'">
+                        <h3 class="text-lg font-bold text-gray-900 mb-4 drop-shadow-sm">Marcas</h3>
+                        <div class="space-y-3">
+                             <template x-for="brand in ['Ford', 'Toyota', 'Nissan', 'Honda', 'Chevrolet', 'Dodge']">
+                                <label class="flex items-center gap-3 p-3 bg-white/40 rounded-xl cursor-pointer hover:bg-white/60 border border-white/30 shadow-sm backdrop-blur-sm transition-all">
+                                    <input type="checkbox" :value="brand" x-model="selectedBrands" class="w-5 h-5 text-blue-600 rounded focus:ring-blue-500 bg-white/50 border-gray-300">
+                                    <span class="font-medium text-gray-800" x-text="brand"></span>
+                                </label>
+                             </template>
+                        </div>
+                    </div>
+                     <div x-show="activeFilterTab === 'year'">
+                        <h3 class="text-lg font-bold text-gray-900 mb-4">Año</h3>
+                        <p class="text-gray-500 text-sm">Próximamente...</p>
                     </div>
                 </div>
-                 <div x-show="activeFilterTab === 'year'">
-                    <h3 class="text-lg font-bold text-gray-900 mb-4">Año</h3>
-                    <p class="text-gray-400 text-sm">Próximamente...</p>
-                </div>
             </div>
-        </div>
-        <div class="p-6 border-t border-gray-100 flex gap-4 pb-8 bg-white/80 backdrop-blur-md">
-            <button @click="clearFilters()" class="flex-1 py-4 text-gray-500 font-bold hover:bg-gray-100 rounded-xl transition-colors">Limpiar</button>
-            <button @click="applyFilters()" class="flex-[2] py-4 bg-black text-white font-bold rounded-xl shadow-lg active:scale-95 transition-all">Ver Resultados</button>
+            
+            <div class="p-6 border-t border-white/20 flex gap-4 pb-10 bg-white/20 backdrop-blur-xl">
+                <button @click="clearFilters()" class="flex-1 py-4 text-gray-600 font-bold hover:bg-white/30 rounded-2xl transition-colors border border-transparent hover:border-white/20">Limpiar</button>
+                <button @click="applyFilters()" class="flex-[2] py-4 bg-black/80 backdrop-blur-md text-white font-bold rounded-2xl shadow-lg border border-white/20 active:scale-95 transition-all">Ver Resultados</button>
+            </div>
         </div>
     </div>
 
