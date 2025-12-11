@@ -8,7 +8,7 @@ import {
     createUserWithEmailAndPassword, 
     signInWithPopup,
     updateProfile,
-    sendEmailVerification, // <--- NEW IMPORT
+    sendEmailVerification, 
     GoogleAuthProvider,
     signOut,
     onAuthStateChanged
@@ -328,9 +328,26 @@ window.app = function() {
                     const data = doc.data();
                     let date = new Date();
                     if (data.created_at && data.created_at.toDate) date = data.created_at.toDate();
+                    
+                    // --- ROBUST MAKE/MODEL PARSING ---
+                    let displayMake = data.make;
+                    let displayModel = data.model_name;
+                    
+                    // Fallback for old listings that only have 'model' string
+                    if (!displayMake || !displayModel) {
+                        const parts = (data.model || "").split(" ");
+                        if (parts.length >= 1) displayMake = parts[0];
+                        if (parts.length >= 2) displayModel = parts.slice(1).join(" ");
+                        if (!displayMake) displayMake = "Marca";
+                        if (!displayModel) displayModel = "Modelo";
+                    }
+
                     const is4x4 = (data.model || "").toLowerCase().includes("4x4") || (data.transmission || "").toLowerCase().includes("4x4");
+                    
                     return {
                         id: doc.id,
+                        make: displayMake,
+                        modelName: displayModel,
                         model: data.model || "Modelo Desconocido",
                         price: Number(data.price) || 0,
                         year: Number(data.year) || 2000,
