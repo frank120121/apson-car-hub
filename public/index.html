@@ -90,9 +90,7 @@
         }
 
         .liquid-pill {
-            background: rgba(0, 0, 0, 0.45);
-            backdrop-filter: blur(16px) saturate(120%);
-            -webkit-backdrop-filter: blur(16px) saturate(120%);
+        background: rgba(0, 0, 0, 0.6);
             border: 1px solid rgba(255, 255, 255, 0.2);
             box-shadow: 0 4px 10px rgba(0,0,0,0.1);
         }
@@ -127,6 +125,20 @@
         .animate-progress { animation: progress 2s ease-out forwards; }
         .ease-spring { transition-timing-function: cubic-bezier(0.175, 0.885, 0.32, 1.1); }
         .ease-out-expo { transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1); }
+        @keyframes headlightSweep {
+            0% { -webkit-mask-position: -150% 0; mask-position: -150% 0; }
+            100% { -webkit-mask-position: 250% 0; mask-position: 250% 0; }
+        }
+
+        .headlight-mask {
+            -webkit-mask-image: linear-gradient(105deg, transparent 20%, black 45%, black 55%, transparent 80%);
+            mask-image: linear-gradient(105deg, transparent 20%, black 45%, black 55%, transparent 80%);
+            -webkit-mask-size: 200% 100%;
+            mask-size: 200% 100%;
+            -webkit-mask-repeat: no-repeat;
+            mask-repeat: no-repeat;
+            animation: headlightSweep 3.5s infinite ease-in-out;
+        }
     </style>
 </head>
 
@@ -141,29 +153,38 @@
             <div class="absolute top-[40%] left-[50%] w-[200px] h-[200px] bg-teal-400/20 rounded-full blur-[60px]" style="animation-delay: 2s"></div>
         </div>
 
-        <div class="relative z-10 w-full max-w-xs flex flex-col items-center">
+    <div class="relative z-10 w-full max-w-xs flex flex-col items-center">
+        
+        <div class="relative w-full p-4 -m-4">
             
-            <div class="mb-12 relative" x-data="{ scale: false }" x-init="setTimeout(() => scale = true, 200)">
-                <h1 class="text-7xl font-black tracking-tighter text-gray-900 transform -skew-x-12 transition-transform duration-700 drop-shadow-sm mix-blend-overlay"
-                    :class="scale ? 'scale-110' : 'scale-100'">
-                    NEX<span class="text-blue-600">CAR</span>
-                </h1>
-                <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-48 h-32 liquid-glass rounded-full blur-xl -z-10 opacity-50"></div>
-            </div>
+            <div x-data="{ scale: false }" x-init="setTimeout(() => scale = true, 200)" 
+                class="transform transition-transform duration-700"
+                :class="scale ? 'scale-110' : 'scale-100'">
 
-            <div class="h-8 mb-12 text-center" x-data="{ 
-                    text: '', 
-                    fullText: 'Encuentra tu próximo auto.', 
-                    idx: 0,
-                    type() {
-                        if (this.idx < this.fullText.length) {
-                            this.text += this.fullText.charAt(this.idx);
-                            this.idx++;
-                            setTimeout(() => this.type(), 50);
-                        }
-                    }
-                }" x-init="setTimeout(() => type(), 500)">
-                <p class="text-lg font-medium text-gray-600 tracking-tight" x-text="text"></p>
+                <div class="flex flex-col items-center opacity-20 filter grayscale blur-[0.5px]">
+                    <h1 class="text-7xl font-black tracking-tighter text-gray-900 transform -skew-x-12 drop-shadow-sm">
+                        NEX<span class="text-blue-600">CAR</span>
+                    </h1>
+                    <p class="text-lg font-medium text-gray-600 tracking-tight mt-4 h-8">
+                        Encuentra tu próximo auto.
+                    </p>
+                </div>
+
+                <div class="absolute inset-0 flex flex-col items-center headlight-mask z-10">
+                    <h1 class="text-7xl font-black tracking-tighter text-gray-900 transform -skew-x-12 drop-shadow-sm">
+                        NEX<span class="text-blue-600">CAR</span>
+                    </h1>
+                    <p class="text-lg font-medium text-gray-600 tracking-tight mt-4 h-8">
+                        Encuentra tu próximo auto.
+                    </p>
+                    
+                    <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/50 to-transparent mix-blend-overlay pointer-events-none"></div>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 gap-4 w-full mt-8">
             </div>
 
             <div class="grid grid-cols-1 gap-4 w-full">
