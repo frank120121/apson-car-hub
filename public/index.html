@@ -125,19 +125,53 @@
         .animate-progress { animation: progress 2s ease-out forwards; }
         .ease-spring { transition-timing-function: cubic-bezier(0.175, 0.885, 0.32, 1.1); }
         .ease-out-expo { transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1); }
+        
+        /* UPDATED HEADLIGHT EFFECT */
         @keyframes headlightSweep {
             0% { -webkit-mask-position: -150% 0; mask-position: -150% 0; }
-            100% { -webkit-mask-position: 250% 0; mask-position: 250% 0; }
+            100% { -webkit-mask-position: 200% 0; mask-position: 200% 0; }
         }
 
         .headlight-mask {
-            -webkit-mask-image: linear-gradient(105deg, transparent 20%, black 45%, black 55%, transparent 80%);
-            mask-image: linear-gradient(105deg, transparent 20%, black 45%, black 55%, transparent 80%);
+            /* Creates two distinct beams: Transparent -> Soft Beam 1 -> Dark Center -> Soft Beam 1 -> Gap -> Soft Beam 2 -> Dark Center -> Soft Beam 2 -> Transparent */
+            -webkit-mask-image: linear-gradient(105deg, 
+                transparent 10%, 
+                rgba(0,0,0,0.2) 20%,
+                rgba(0,0,0,0.8) 25%,
+                #000 30%, 
+                rgba(0,0,0,0.8) 35%,
+                rgba(0,0,0,0.2) 40%,
+                transparent 45%, /* The Gap between headlights */
+                transparent 50%,
+                rgba(0,0,0,0.2) 55%,
+                rgba(0,0,0,0.8) 60%, 
+                #000 65%, 
+                rgba(0,0,0,0.8) 70%,
+                rgba(0,0,0,0.2) 75%,
+                transparent 85%
+            );
+            mask-image: linear-gradient(105deg, 
+                transparent 10%, 
+                rgba(0,0,0,0.2) 20%,
+                rgba(0,0,0,0.8) 25%,
+                #000 30%, 
+                rgba(0,0,0,0.8) 35%,
+                rgba(0,0,0,0.2) 40%,
+                transparent 45%,
+                transparent 50%,
+                rgba(0,0,0,0.2) 55%,
+                rgba(0,0,0,0.8) 60%, 
+                #000 65%, 
+                rgba(0,0,0,0.8) 70%,
+                rgba(0,0,0,0.2) 75%,
+                transparent 85%
+            );
             -webkit-mask-size: 200% 100%;
             mask-size: 200% 100%;
             -webkit-mask-repeat: no-repeat;
             mask-repeat: no-repeat;
-            animation: headlightSweep 3.5s infinite ease-in-out;
+            /* Slowed down to 6s for a more realistic passing car effect */
+            animation: headlightSweep 6s infinite ease-in-out;
         }
     </style>
 </head>
