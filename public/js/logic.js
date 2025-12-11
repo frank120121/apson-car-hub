@@ -372,6 +372,12 @@ window.app = function() {
             let list = this.cars;
             if (this.currentView === 'favorites') list = list.filter(car => this.favorites.includes(car.id));
             
+            const lowerSearch = this.search.toLowerCase();
+            const isPickup = lowerSearch === 'pickup';
+            const isNacional = lowerSearch === 'nacional';
+            const is4x4 = lowerSearch === '4x4';
+            const isEco = lowerSearch === 'economico';
+
             list = list.filter(car => {
                 if (this.minPrice && car.price < Number(this.minPrice)) return false;
                 if (this.maxPrice && car.price > Number(this.maxPrice)) return false;
@@ -382,11 +388,13 @@ window.app = function() {
                 if (this.search !== '') {
                     const lowerSearch = this.search.toLowerCase();
                     const matchesText = car.model.toLowerCase().includes(lowerSearch) || car.year.toString().includes(lowerSearch);
-                    if (lowerSearch === 'trokas') return car.model.toLowerCase().includes('lobo') || car.model.toLowerCase().includes('sierra') || car.model.toLowerCase().includes('silverado') || car.model.toLowerCase().includes('tacoma');
-                    if (lowerSearch === 'nacional') return car.legal.toLowerCase() === 'nacional';
-                    if (lowerSearch === '4x4') return car.is4x4;
-                    if (lowerSearch === 'economico') return car.price < 200000;
-                    if (!matchesText) return false;
+                    if (isPickup) return ['lobo','sierra','silverado','tacoma'].some(t => car.model.toLowerCase().includes(t));
+                    if (isNacional) return car.legal.toLowerCase() === 'nacional';
+                    if (is4x4) return car.is4x4;
+                    if (isEco) return car.price < 200000;
+
+                    // Standard text search
+                    return car.model.toLowerCase().includes(lowerSearch) || car.year.toString().includes(lowerSearch);
                 }
                 return true;
             });

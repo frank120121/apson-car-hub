@@ -8,7 +8,7 @@ import Alpine from "https://cdn.jsdelivr.net/npm/alpinejs@3.12.0/dist/module.esm
 const storage = getStorage();
 
 // DATABASE OF MODELS
-const carDatabase = {
+const CAR_DATABASE = {
     'Ford': ['Lobo', 'F-150', 'Ranger', 'Maverick', 'Explorer', 'Edge', 'Mustang', 'Escape', 'Expedition', 'Figo', 'Fiesta', 'Focus', 'Bronco'],
     'Chevrolet': ['Silverado', 'Cheyenne', 'Colorado', 'Aveo', 'Spark', 'Beat', 'Cavalier', 'Trax', 'Suburban', 'Tahoe', 'Camaro', 'Captiva', 'Onix'],
     'Nissan': ['Versa', 'Sentra', 'NP300', 'Frontier', 'March', 'Kicks', 'Altima', 'X-Trail', 'Urvan', 'Tsuru', 'Maxima'],
@@ -28,6 +28,10 @@ const carDatabase = {
     'Otro': ['Otro']
 };
 
+const YEARS_LIST = Array.from({length: 30}, (_, i) => new Date().getFullYear() + 1 - i);
+const MAKES_LIST = Object.keys(CAR_DATABASE).sort();
+const TYPES_LIST = ['Pickup', 'Sedan', 'SUV', 'Hatchback', 'Van', 'Coupe', 'Convertible', 'Deportivo', 'Moto', 'Otro'];
+
 window.sellApp = function() {
     return {
         // STATE
@@ -36,9 +40,9 @@ window.sellApp = function() {
         uploading: false,
         
         // Data Sources
-        years: Array.from({length: 30}, (_, i) => new Date().getFullYear() + 1 - i),
-        makes: Object.keys(carDatabase).sort(),
-        types: ['Pickup', 'Sedan', 'SUV', 'Hatchback', 'Van', 'Coupe', 'Convertible', 'Deportivo', 'Moto', 'Otro'],
+        years: YEARS_LIST,
+        makes: MAKES_LIST,
+        types: TYPES_LIST,
         
         // Dynamic Models List
         availableModels: [],
@@ -51,25 +55,25 @@ window.sellApp = function() {
             trim: '',
             type: 'Pickup',
             price: '',
-            km: '',           // <--- NEW: Mileage
-            desc: '',         // <--- NEW: Description
+            km: '',
+            desc: '', 
             legal: 'Importado',
             trans: 'Auto'
         },
 
         init() {
-            // Load initial models for default make (Ford)
+            // Load initial models for default make
             this.updateModels();
             
             // Watch for changes in Make to update Models
             this.$watch('form.make', (value) => {
                 this.updateModels();
-                this.form.model = this.availableModels[0]; // Select first by default
+                this.form.model = this.availableModels[0];
             });
         },
 
         updateModels() {
-            this.availableModels = carDatabase[this.form.make] || ['Otro'];
+            this.availableModels = CAR_DATABASE[this.form.make] || ['Otro'];
         },
 
         // FILES LOGIC
@@ -101,17 +105,16 @@ window.sellApp = function() {
 
             try {
                 // 1. Upload Images
-                const imageUrls = [];
-                for (let i = 0; i < this.files.length; i++) {
-                    const file = this.files[i];
-                    const fileName = `cars/${Date.now()}_${i}_${file.name}`;
-                    const snapshot = await uploadBytes(ref(storage, fileName), file);
-                    imageUrls.push(await getDownloadURL(snapshot.ref));
-                }
 
+                const uploadPromises = this.files.map((file, i) => {
+                    const fileName = `cars/${Date.now()}_${i}_${file.name}`;
+                    const storageRef = ref(storage, fileName);
+                    return uploadBytes(storageRef, file)
+                        .then(snapshot => getDownloadURL(snapshot.ref));
+                });
+
+                const imageUrls = await Promise.all(uploadPromises);
                 // 2. Format Data
-                // Combine Make + Model + Trim for the display title
-                // Example: "Ford Lobo Lariat"
                 const trimString = this.form.trim ? ` ${this.form.trim}` : '';
                 const fullModelString = `${this.form.make} ${this.form.model}${trimString}`;
 
